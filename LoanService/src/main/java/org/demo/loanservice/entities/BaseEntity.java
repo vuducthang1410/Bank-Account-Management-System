@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -29,19 +30,25 @@ public class BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false, nullable = false, length = 50, name = "ID")
+    @Audited
     private String id;
     @CreatedBy
     @Column(updatable = false, nullable = false, length = 50, name = "CREATED_BY")
+    @Audited
     private String createdBy;
     @LastModifiedBy
     @Column(length = 50,name = "LAST_MODIFIED_BY")
+    @Audited
     private String lastModifiedBy;
     @CreatedDate
     @Column(updatable = false, nullable = false, length = 50, name = "CREATED_DATE")
+    @Audited
     private LocalDateTime createdDate;
     @LastModifiedDate
     @Column( length = 50,name = "LAST_MODIFIED_DATE")
+    @Audited
     private LocalDateTime lastModifiedDate;
     @Column( length = 1,name = "IS_DELETED")
+    @Audited
     private Boolean isDelete;
 }
