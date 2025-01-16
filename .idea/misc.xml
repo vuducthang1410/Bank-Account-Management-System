@@ -11,6 +11,7 @@
         <option value="$PROJECT_DIR$/NotificationService/pom.xml" />
         <option value="$PROJECT_DIR$/ReportingService/pom.xml" />
         <option value="$PROJECT_DIR$/ConfigServer/pom.xml" />
+        <option value="$PROJECT_DIR$/ApiGetwayService/pom.xml" />
       </list>
     </option>
   </component>

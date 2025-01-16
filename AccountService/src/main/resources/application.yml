@@ -1,0 +1,13 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: account-service
+
+
+logging:
+  file:
+    path: logs/access_log.log/account_service
+  level:
+    org.demo.accountservice.config.CustomRequestLoggingFilter: DEBUG
