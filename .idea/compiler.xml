@@ -3,27 +3,18 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Annotation profile for ReportingService" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
-        </processorPath>
-        <module name="ReportingService" />
-        <module name="TransactionService" />
-        <module name="AccountService" />
-        <module name="CustomerSerivce" />
-      </profile>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="TransactionService" />
         <module name="NotificationService" />
         <module name="ConfigServer" />
         <module name="ApiGetwayService" />
+        <module name="ReportingService" />
         <module name="LoanService" />
+        <module name="AccountService" />
+        <module name="CustomerSerivce" />
       </profile>
     </annotationProcessing>
   </component>

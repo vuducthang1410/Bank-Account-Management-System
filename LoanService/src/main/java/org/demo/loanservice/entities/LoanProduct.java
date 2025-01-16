@@ -2,16 +2,21 @@ package org.demo.loanservice.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.envers.Audited;
+
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_loan_product")
@@ -60,5 +65,8 @@ public class LoanProduct extends BaseEntity {
     @Schema(description = "Loan conditions that borrowers must meet to qualify for" +
             " the loan, such as credit score, income, etc.")
     private byte[] loanCondition;
+
+    @OneToMany(mappedBy = "loanProductId")
+    private Set<UserLoanInfo> userLoanInfos;
 }
 
