@@ -2,6 +2,9 @@ package org.demo.loanservice.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -21,5 +24,7 @@ import org.hibernate.envers.Audited;
 @Audited
 public class DeftRepaymentHistory extends BaseEntity{
     private String paymentDate;
-    private String userLoanInfo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_loan_info_id")
+    private CustomerLoanInfo customerLoanInfoId;
 }

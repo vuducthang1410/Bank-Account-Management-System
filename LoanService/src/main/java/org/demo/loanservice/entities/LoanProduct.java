@@ -2,6 +2,9 @@ package org.demo.loanservice.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -48,7 +51,9 @@ public class LoanProduct extends BaseEntity {
 
     @Schema(description = "The interest rate ID associated with this loan product," +
             " linking to the interest rate table.")
-    private String interestRateId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interest_rate_id")
+    private InterestRate interestRateId;
 
     @Schema(description = "The type of asset that can be used as collateral for " +
             "this loan product, e.g., real estate, vehicles, etc.")
@@ -65,8 +70,8 @@ public class LoanProduct extends BaseEntity {
     @Schema(description = "Loan conditions that borrowers must meet to qualify for" +
             " the loan, such as credit score, income, etc.")
     private byte[] loanCondition;
-
+    private String maximumLoanTerm;
     @OneToMany(mappedBy = "loanProductId")
-    private Set<UserLoanInfo> userLoanInfos;
+    private Set<CustomerLoanInfo> userLoanInfos;
 }
 
