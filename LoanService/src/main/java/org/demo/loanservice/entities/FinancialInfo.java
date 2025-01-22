@@ -1,6 +1,7 @@
 package org.demo.loanservice.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

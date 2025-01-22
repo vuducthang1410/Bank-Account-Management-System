@@ -1,17 +1,13 @@
 package org.demo.loanservice.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import org.demo.loanservice.dto.enumDto.DeftRepaymentStatus;
 import org.hibernate.envers.Audited;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -20,11 +16,17 @@ import org.hibernate.envers.Audited;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "tbl_deft_repayment_history")
-@Schema(description = "Deft repayment history")
 @Audited
 public class DeftRepaymentHistory extends BaseEntity{
     private String paymentDate;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_loan_info_id")
     private CustomerLoanInfo customerLoanInfoId;
+
+    private Timestamp dueDate;
+    private BigDecimal amountRepayment;
+    private Boolean isPaid;
+    @Enumerated(EnumType.STRING)
+    private DeftRepaymentStatus status;
+
 }

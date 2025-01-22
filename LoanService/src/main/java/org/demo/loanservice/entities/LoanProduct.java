@@ -2,6 +2,8 @@ package org.demo.loanservice.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -12,8 +14,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.hibernate.envers.Audited;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -33,17 +37,13 @@ public class LoanProduct extends BaseEntity {
             " mortgage loan, unsecured loan, etc.")
     private String formLoan;
 
-    @Schema(description = "The loan term, represented in months or years, " +
-            "e.g., 12 months, 24 months.")
-    private String loanTerm;
-
     @Schema(description = "The loan limit, indicating the maximum amount " +
             "a customer can borrow for this loan product, e.g., 100 million VND.")
-    private String loanLimit;
+    private BigDecimal loanLimit;
 
     @Schema(description = "The target borrower, describing the type of borrower " +
             "the loan product is intended for, e.g., individuals, households, businesses.")
-    private String loanObject;
+    private String nameProduct;
 
     @Schema(description = "A detailed description of the loan product, including terms and" +
             " features of the loan.")
@@ -54,10 +54,6 @@ public class LoanProduct extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interest_rate_id")
     private InterestRate interestRateId;
-
-    @Schema(description = "The type of asset that can be used as collateral for " +
-            "this loan product, e.g., real estate, vehicles, etc.")
-    private String typeAsset;
 
     @Schema(description = "Utility services associated with the loan product, " +
             "which may include insurance, financial planning services, etc.")
@@ -70,7 +66,10 @@ public class LoanProduct extends BaseEntity {
     @Schema(description = "Loan conditions that borrowers must meet to qualify for" +
             " the loan, such as credit score, income, etc.")
     private byte[] loanCondition;
-    private String maximumLoanTerm;
+
+    @Enumerated(EnumType.STRING)
+    private ApplicableObjects applicableObjects;
+
     @OneToMany(mappedBy = "loanProductId")
     private Set<CustomerLoanInfo> userLoanInfos;
 }

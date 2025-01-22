@@ -52,5 +52,5 @@ public class BaseEntity implements Serializable {
     private LocalDateTime lastModifiedDate;
     @Column( length = 1,name = "IS_DELETED")
     @Audited
-    private Boolean isDelete;
+    private Boolean isDeleted;
 }

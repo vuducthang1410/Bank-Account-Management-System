@@ -13,11 +13,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.demo.loanservice.dto.enumDto.DocumentType;
+import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanStatus;
 import org.demo.loanservice.dto.enumDto.RequestStatus;
+import org.demo.loanservice.dto.enumDto.Unit;
 import org.hibernate.envers.Audited;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Set;
 
@@ -42,6 +44,17 @@ public class CustomerLoanInfo extends BaseEntity {
     private Timestamp loanDate;
     @Enumerated(EnumType.STRING)
     private LoanStatus loanStatus;
+    private BigDecimal loanAmount;
+    @Enumerated(EnumType.STRING)
+    private ApplicableObjects applicableObjects;
+    private Integer loanTerm;
+    @Enumerated(EnumType.STRING)
+    private Unit unit;
+
+    private Double interestRate;
+    @ManyToOne
+    @JoinColumn(name = "preferential_interest_rate_id")
+    private PreferentialInterestRate preferentialInterestRate;
     @OneToMany(mappedBy = "customerLoanInfoId")
     private Set<DeftRepaymentHistory> deftRepaymentHistories;
     @OneToMany(mappedBy = "customerLoanInfoId")
