@@ -16,4 +16,6 @@ public class MessageValue {
     public static final String VALID_DTO_UNIT_NOT_VALID = "valid.dto.unit.notValid";
     public static final String VALID_DTO_INTEREST_RATE_IS_POSITIVE="valid.dto.interest_rate.isPositive";
     public static final String MISSING_PARAMETER_IN_HEADER="missing.parameter.header";
+    public static final String SERVER_ERROR="server.error.message";
+    public static final String TYPE_MORTGAGED_ASSET_NOT_FOUND="type_mortgaged_asset.not_found";
 }

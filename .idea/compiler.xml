@@ -7,9 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="LoanService" />
         <module name="ConfigServer" />
         <module name="ApiGetwayService" />
-        <module name="LoanService" />
       </profile>
       <profile name="Annotation profile for TransactionService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -29,13 +29,13 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="AccountService" options="-parameters" />
-      <module name="ApiGetwayService" options="-parameters" />
-      <module name="ConfigServer" options="-parameters" />
-      <module name="CustomerSerivce" options="-parameters" />
+      <module name="ApiGetwayService" options="" />
+      <module name="ConfigServer" options="" />
+      <module name="CustomerSerivce" options="" />
       <module name="LoanService" options="-parameters" />
-      <module name="NotificationService" options="-parameters" />
-      <module name="ReportingService" options="-parameters" />
-      <module name="TransactionService" options="-parameters" />
+      <module name="NotificationService" options="" />
+      <module name="ReportingService" options="" />
+      <module name="TransactionService" options="" />
     </option>
   </component>
 </project>

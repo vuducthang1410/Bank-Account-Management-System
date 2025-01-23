@@ -1,13 +1,13 @@
 package org.demo.loanservice.services.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
 import org.demo.loanservice.common.MessageValue;
 import org.demo.loanservice.common.Util;
 import org.demo.loanservice.controllers.exception.InterestRateNotFoundException;
 import org.demo.loanservice.dto.enumDto.Unit;
 import org.demo.loanservice.dto.request.InterestRateRq;
-import org.demo.loanservice.dto.response.DataResponseWrapper;
 import org.demo.loanservice.dto.response.InterestRateRp;
 import org.demo.loanservice.entities.InterestRate;
 import org.demo.loanservice.repositories.InterestRateRepository;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class InterestRateService implements IInterestRateService {
+public class InterestRateServiceImpl implements IInterestRateService {
     private final InterestRateRepository interestRateRepository;
     private final Util util;
 
@@ -66,9 +66,6 @@ public class InterestRateService implements IInterestRateService {
     public DataResponseWrapper<Object> getAll(Integer pageNumber, Integer pageSize, String transactionId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate"));
         Page<InterestRate> interestRatePage = interestRateRepository.findAllByIsDeleted(false, pageable);
-        if (interestRatePage.isEmpty()) {
-            throw new InterestRateNotFoundException();
-        }
         Map<String, Object> dataResponse = new HashMap<>();
         dataResponse.put("totalRecord", interestRatePage.getTotalElements());
         List<InterestRateRp> interestRateRpList = interestRatePage.stream().map(this::convertToInterestRateRp).toList();
