@@ -1,7 +1,7 @@
 package org.demo.loanservice.config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jetbrains.annotations.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
 
 import java.util.regex.Matcher;

@@ -11,6 +11,8 @@ import org.demo.loanservice.dto.response.TypeMortgagedAssetsRp;
 import org.demo.loanservice.entities.TypeMortgagedAssets;
 import org.demo.loanservice.repositories.TypeMortgagedAssetRepository;
 import org.demo.loanservice.services.ITypeMortgagedAssetService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +46,7 @@ public class TypeMortgagedAssetServiceImpl implements ITypeMortgagedAssetService
     }
 
     @Override
+    @Cacheable(value = "type_mortgaged_assets",key = "#id",unless = "#result == null")
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
         Optional<TypeMortgagedAssets> optionalTypeMortgagedAssets = typeMortgagedAssetRepository.getTypeMortgagedAssetsByIdAndIsDeleted(id, false);
         if (optionalTypeMortgagedAssets.isEmpty()) {
@@ -67,6 +70,7 @@ public class TypeMortgagedAssetServiceImpl implements ITypeMortgagedAssetService
     }
 
     @Override
+    @CacheEvict(value = "interest_rate",key = "#id")
     public DataResponseWrapper<Object> update(String id,TypeMortgagedAssetsRq typeMortgagedAssetsRq, String transactionId) {
         Optional<TypeMortgagedAssets> optionalTypeMortgagedAssets = typeMortgagedAssetRepository.getTypeMortgagedAssetsByIdAndIsDeleted(id, false);
         if (optionalTypeMortgagedAssets.isEmpty()) {
@@ -82,6 +86,7 @@ public class TypeMortgagedAssetServiceImpl implements ITypeMortgagedAssetService
     }
 
     @Override
+    @CacheEvict(value = "interest_rate",key = "#id")
     public DataResponseWrapper<Object> active(String id, String transactionId) {
         Optional<TypeMortgagedAssets> optionalTypeMortgagedAssets = typeMortgagedAssetRepository.getTypeMortgagedAssetsByIdAndIsDeleted(id, false);
         if (optionalTypeMortgagedAssets.isEmpty()) {
@@ -94,6 +99,7 @@ public class TypeMortgagedAssetServiceImpl implements ITypeMortgagedAssetService
     }
 
     @Override
+    @CacheEvict(value = "interest_rate",key = "#id")
     public DataResponseWrapper<Object> delete(String id, String transactionId) {
         Optional<TypeMortgagedAssets> optionalTypeMortgagedAssets = typeMortgagedAssetRepository.getTypeMortgagedAssetsByIdAndIsDeleted(id, false);
         if (optionalTypeMortgagedAssets.isEmpty()) {

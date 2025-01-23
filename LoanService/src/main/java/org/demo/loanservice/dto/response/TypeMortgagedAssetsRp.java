@@ -2,8 +2,10 @@ package org.demo.loanservice.dto.response;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class TypeMortgagedAssetsRp {
+public class TypeMortgagedAssetsRp implements Serializable {
     private String id;
     private String name;
     private String description;

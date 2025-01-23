@@ -2,8 +2,10 @@ package org.demo.loanservice.dto.response;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class InterestRateRp {
+public class InterestRateRp implements Serializable {
     private String id;
     private String interestRate;
     private String unit;

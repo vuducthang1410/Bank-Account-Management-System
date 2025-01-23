@@ -12,6 +12,8 @@ import org.demo.loanservice.dto.response.InterestRateRp;
 import org.demo.loanservice.entities.InterestRate;
 import org.demo.loanservice.repositories.InterestRateRepository;
 import org.demo.loanservice.services.IInterestRateService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +53,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
+    @Cacheable(value = "interest_rate",key = "#id",unless = "#result == null")
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
         if (optionalInterestRate.isEmpty())
@@ -78,6 +81,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
+    @CacheEvict(value = "interest_rate",key = "#id")
     public DataResponseWrapper<Object> active(String id, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
         if (optionalInterestRate.isEmpty())
@@ -94,6 +98,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
+    @CacheEvict(value = "interest_rate",key = "#id")
     public DataResponseWrapper<Object> update(String id, InterestRateRq interestRateRq, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
         if (optionalInterestRate.isEmpty())
@@ -113,6 +118,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
+    @CacheEvict(value = "interest_rate",key = "#id")
     public DataResponseWrapper<Object> delete(String id, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
         if (optionalInterestRate.isEmpty())
