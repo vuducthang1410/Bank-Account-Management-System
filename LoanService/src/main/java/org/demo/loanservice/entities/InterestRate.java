@@ -34,6 +34,6 @@ public class InterestRate extends BaseEntity {
     private Boolean isActive;
     private BigDecimal minimumAmount;
     private Integer minimumLoanTerm;
-    @OneToMany(mappedBy = "interestRateId")
+    @OneToMany(mappedBy = "interestRate")
     private Set<LoanProduct> loanProducts;
 }

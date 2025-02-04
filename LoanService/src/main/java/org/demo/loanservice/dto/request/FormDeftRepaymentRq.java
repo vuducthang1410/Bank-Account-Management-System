@@ -1,10 +1,11 @@
 package org.demo.loanservice.dto.request;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.demo.loanservice.common.MessageValue;
+import org.demo.loanservice.validatedCustom.interfaceValidate.FormDeftRepaymentValidation;
+
+import java.util.List;
 
 @Data
 public class FormDeftRepaymentRq {
@@ -12,7 +13,6 @@ public class FormDeftRepaymentRq {
     private String formName;
     @NotBlank(message = MessageValue.VALID_DTO_DESCRIPTION_NOT_BLANK)
     private String description;
-    @NotNull
-    @Min(value = 0)
-    private int value;
+    @FormDeftRepaymentValidation
+    private String code;
 }

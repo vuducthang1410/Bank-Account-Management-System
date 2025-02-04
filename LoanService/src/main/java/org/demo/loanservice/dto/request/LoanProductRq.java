@@ -3,6 +3,8 @@ package org.demo.loanservice.dto.request;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 @Data
 public class LoanProductRq {
     private String nameLoanProduct;
@@ -13,4 +15,5 @@ public class LoanProductRq {
     private String loanCondition;
     private String loanForm;
     private String applicableObjects;
+    List<LoanTermRq> loanTermRqList;
 }

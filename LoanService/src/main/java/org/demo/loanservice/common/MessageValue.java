@@ -5,6 +5,7 @@ public class MessageValue {
     // Common error messages
     public static final String INVALID_DATA = "invalid.data";
     public static final String CREATED_SUCCESSFUL = "created.successful";
+    public static final String DELETED_SUCCESSFUL = "deleted.successful";
 
      public static final String FIND_SUCCESSFULLY="findObject.success";
      public static final String DATA_NOT_FOUND="data.notFound";

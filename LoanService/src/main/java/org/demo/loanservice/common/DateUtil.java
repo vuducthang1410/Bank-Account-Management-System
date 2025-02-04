@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -21,6 +22,15 @@ public class DateUtil {
         try{
             SimpleDateFormat sdf=new SimpleDateFormat(format);
             return sdf.format(date);
+        }catch (Exception ex){
+            log.error("An error occurred while formatting the date {}", ex.getMessage());
+            return "";
+        }
+    }
+    public static String format(String format, LocalDateTime date){
+        try{
+            SimpleDateFormat sdf=new SimpleDateFormat(format);
+            return sdf.format( Date.from(date.atZone(ZoneId.systemDefault()).toInstant()));
         }catch (Exception ex){
             log.error("An error occurred while formatting the date {}", ex.getMessage());
             return "";

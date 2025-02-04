@@ -1,5 +1,6 @@
 package org.demo.loanservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,9 +16,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
+import org.demo.loanservice.dto.enumDto.LoanType;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -35,7 +38,8 @@ public class LoanProduct extends BaseEntity {
 
     @Schema(description = "The form of the loan, e.g., consumer loan," +
             " mortgage loan, unsecured loan, etc.")
-    private String formLoan;
+    @Enumerated(EnumType.STRING)
+    private LoanType formLoan;
 
     @Schema(description = "The loan limit, indicating the maximum amount " +
             "a customer can borrow for this loan product, e.g., 100 million VND.")
@@ -53,7 +57,8 @@ public class LoanProduct extends BaseEntity {
             " linking to the interest rate table.")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interest_rate_id")
-    private InterestRate interestRateId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private InterestRate interestRate;
 
     @Schema(description = "Utility services associated with the loan product, " +
             "which may include insurance, financial planning services, etc.")
@@ -69,8 +74,7 @@ public class LoanProduct extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ApplicableObjects applicableObjects;
-
-    @OneToMany(mappedBy = "loanProductId")
-    private Set<CustomerLoanInfo> userLoanInfos;
+    @OneToMany(mappedBy = "loanProduct")
+    private List<LoanTerm> loanTermList;
 }
 

@@ -2,7 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/AccountService/AccountService.iml" filepath="$PROJECT_DIR$/AccountService/AccountService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ApiGetwayService/ApiGetwayService.iml" filepath="$PROJECT_DIR$/ApiGetwayService/ApiGetwayService.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/BankAccountManagementSystem.iml" filepath="$PROJECT_DIR$/.idea/BankAccountManagementSystem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CustomerSerivce/CustomerSerivce.iml" filepath="$PROJECT_DIR$/CustomerSerivce/CustomerSerivce.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ReportingService/ReportingService.iml" filepath="$PROJECT_DIR$/ReportingService/ReportingService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/TransactionService/TransactionService.iml" filepath="$PROJECT_DIR$/TransactionService/TransactionService.iml" />
     </modules>
   </component>
 </project>
