@@ -15,5 +15,6 @@ public class LoanProductRq {
     private String loanCondition;
     private String loanForm;
     private String applicableObjects;
-    List<LoanTermRq> loanTermRqList;
+    private Integer termLimit;
 }
+

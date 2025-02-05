@@ -6,16 +6,12 @@ import org.demo.loanservice.common.DateUtil;
 import org.demo.loanservice.controllers.exception.InterestRateNotFoundException;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanType;
-import org.demo.loanservice.dto.enumDto.Unit;
 import org.demo.loanservice.dto.request.LoanProductRq;
 import org.demo.loanservice.dto.response.LoanProductRp;
-import org.demo.loanservice.dto.response.LoanTermRp;
 import org.demo.loanservice.entities.InterestRate;
 import org.demo.loanservice.entities.LoanProduct;
-import org.demo.loanservice.entities.LoanTerm;
 import org.demo.loanservice.repositories.InterestRateRepository;
 import org.demo.loanservice.repositories.LoanProductRepository;
-import org.demo.loanservice.repositories.LoanTermRepository;
 import org.demo.loanservice.services.ILoanProductService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -32,14 +28,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LoanProductServiceImpl implements ILoanProductService {
     private final LoanProductRepository loanProductRepository;
     private final InterestRateRepository interestRateRepository;
-    private final LoanTermRepository loanTermRepository;
 
     @Override
     @Transactional
@@ -60,12 +54,8 @@ public class LoanProductServiceImpl implements ILoanProductService {
         loanProduct.setProductUrlImage("https://example.com/djaiajd.jpg");//todo
         loanProduct.setUtilities(loanProductRq.getUtilities().getBytes(StandardCharsets.UTF_8));
         loanProduct.setIsDeleted(false);
+        loanProduct.setTermLimit(loanProductRq.getTermLimit());
         loanProductRepository.save(loanProduct);
-        List<LoanTerm> loanTermList=loanProductRq.getLoanTermRqList()
-                .stream()
-                .map(e->new LoanTerm(loanProduct,e.getTerm(), Unit.valueOf(e.getUnit())))
-                .toList();
-        loanTermRepository.saveAll(loanTermList);
         return DataResponseWrapper.builder()
                 .data(loanProduct.getId())
                 .message("successfully")
@@ -150,11 +140,7 @@ public class LoanProductServiceImpl implements ILoanProductService {
         loanProductRp.setLoanLimit(loanProduct.getLoanLimit().toPlainString());
         loanProductRp.setInterestRate(loanProduct.getInterestRate().getInterestRate().toPlainString());
         loanProductRp.setInterestRateUnit(loanProduct.getInterestRate().getUnit().name());
-        loanProductRp.setLoanTerm(loanProduct
-                .getLoanTermList()
-                .stream()
-                .map(this::converToLoanTermRp)
-                .collect(Collectors.toList()));
+        loanProductRp.setTermLimit(loanProduct.getTermLimit());
         if (loanProduct.getUtilities() != null) {
             loanProductRp.setUtilities(new String(loanProduct.getUtilities(), StandardCharsets.UTF_8));
         }
@@ -164,14 +150,5 @@ public class LoanProductServiceImpl implements ILoanProductService {
         }
         loanProductRp.setCreatedDate(DateUtil.format(DateUtil.YYYY_MM_DD_HH_MM_SS, loanProduct.getCreatedDate()));
         return loanProductRp;
-    }
-
-    private LoanTermRp converToLoanTermRp(LoanTerm loanTerm) {
-        LoanTermRp loanTermRp = new LoanTermRp();
-        loanTermRp.setLoanTermId(loanTerm.getId());
-        loanTermRp.setProductId(loanTerm.getLoanProduct().getId());
-        loanTermRp.setTerm(loanTerm.getTerm());
-        loanTermRp.setUnit(loanTerm.getUnit().name());
-        return loanTermRp;
     }
 }

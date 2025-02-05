@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanType;
+import org.demo.loanservice.dto.enumDto.Unit;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
@@ -74,7 +75,11 @@ public class LoanProduct extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ApplicableObjects applicableObjects;
-    @OneToMany(mappedBy = "loanProduct")
-    private List<LoanTerm> loanTermList;
+
+    private Integer termLimit;
+    @Enumerated(EnumType.STRING)
+    private Unit unit;
+//    @OneToMany(mappedBy = "loanProduct")
+//    private List<LoanTerm> loanTermList;
 }
 

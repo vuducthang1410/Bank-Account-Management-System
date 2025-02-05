@@ -1,5 +1,6 @@
 package org.demo.loanservice.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -28,10 +29,11 @@ public class MortgagedAssets extends BaseEntity {
     @JoinColumn(name = "type_mortgaged_assets_id")
     private TypeMortgagedAssets typeMortgagedAssets;
     @ManyToOne
-    @JoinColumn(name = "customer_loan_Info_id")
-    private CustomerLoanInfo customerLoanInfoId;
-    @ManyToOne
     @JoinColumn(name = "legal_documents_id")
     private LegalDocuments legalDocumentsId;
     private Boolean isExpired;
+
+    @ManyToOne
+    @JoinColumn(name = "financial_info_id")
+    private FinancialInfo financialInfo;
 }

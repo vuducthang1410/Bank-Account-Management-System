@@ -13,7 +13,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanStatus;
 import org.demo.loanservice.dto.enumDto.RequestStatus;
 import org.demo.loanservice.dto.enumDto.Unit;
@@ -45,11 +44,10 @@ public class CustomerLoanInfo extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private LoanStatus loanStatus;
     private BigDecimal loanAmount;
-    @Enumerated(EnumType.STRING)
-    private ApplicableObjects applicableObjects;
     private Integer loanTerm;
     @Enumerated(EnumType.STRING)
     private Unit unit;
+    private String reasonRefuse;
 
     private Double interestRate;
     @ManyToOne
@@ -57,6 +55,13 @@ public class CustomerLoanInfo extends BaseEntity {
     private PreferentialInterestRate preferentialInterestRate;
     @OneToMany(mappedBy = "customerLoanInfoId")
     private Set<DeftRepaymentHistory> deftRepaymentHistories;
-    @OneToMany(mappedBy = "customerLoanInfoId")
-    private Set<LegalDocuments> mortgagedAssets;
+
+    // todo: Persist financial information
+    private Integer creditScore;
+    private String income;
+    private String incomeSource;
+    private String incomeType;
+    private String debtStatus;
+    private Timestamp lastUpdatedCreditReview;
+
 }
