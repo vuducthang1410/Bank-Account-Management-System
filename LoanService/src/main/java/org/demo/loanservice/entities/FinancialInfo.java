@@ -6,18 +6,21 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
+import org.demo.loanservice.dto.enumDto.RequestStatus;
 import org.demo.loanservice.dto.enumDto.Unit;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Entity
 @Audited
@@ -27,9 +30,9 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Table(name = "tbl_financial_info")
 public class FinancialInfo extends BaseEntity{
-    @Column(name = "customer_id")
-    private String  customerId;
-    private BigDecimal income;
+    @Column(name = "cif_code")
+    private String  cifCode;
+    private String income;
     @Enumerated(EnumType.STRING)
     private Unit unit;
     @Schema(description = "The user's credit score", example = "750")
@@ -44,5 +47,10 @@ public class FinancialInfo extends BaseEntity{
     private String debtStatus;
     private Date expiredDate;
     private Boolean isExpired;
-    private Boolean isApproved;
+    @Enumerated(EnumType.STRING)
+    private RequestStatus requestStatus;
+
+    private String note;
+    @OneToMany(mappedBy = "financialInfo")
+    private Set<FinancialInfoDocument> financialInfoDocumentSet;
 }

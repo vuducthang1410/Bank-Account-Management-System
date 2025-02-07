@@ -17,7 +17,7 @@ public class InterestRateRq {
 
     @Schema(description = "Interest rate value in percentage", example = "7.5")
     @InterestRateValidation(message = MessageValue.VALID_DTO_INTEREST_RATE_IS_POSITIVE)
-    private BigDecimal interestRate;
+    private Double interestRate;
 
     @Schema(description = "Unit of time for the interest rate", example = "DATE , MONTH or YEAR")
     @UnitValidation(message = "{valid.dto.unit.notValid}")

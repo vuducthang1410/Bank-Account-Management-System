@@ -3,15 +3,18 @@ package org.demo.loanservice.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
+import org.demo.loanservice.common.MessageData;
 import org.demo.loanservice.common.MessageValue;
 import org.demo.loanservice.common.Util;
-import org.demo.loanservice.controllers.exception.InterestRateNotFoundException;
+import org.demo.loanservice.controllers.exception.DataNotFoundException;
 import org.demo.loanservice.dto.enumDto.Unit;
 import org.demo.loanservice.dto.request.InterestRateRq;
 import org.demo.loanservice.dto.response.InterestRateRp;
 import org.demo.loanservice.entities.InterestRate;
 import org.demo.loanservice.repositories.InterestRateRepository;
 import org.demo.loanservice.services.IInterestRateService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -33,6 +36,7 @@ import java.util.Optional;
 public class InterestRateServiceImpl implements IInterestRateService {
     private final InterestRateRepository interestRateRepository;
     private final Util util;
+    private final Logger log = LoggerFactory.getLogger(InterestRateServiceImpl.class);
 
     @Override
     public DataResponseWrapper<Object> save(InterestRateRq interestRateRq, String transactionId) {
@@ -53,11 +57,13 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
-    @Cacheable(value = "interest_rate",key = "#id",unless = "#result == null")
+    @Cacheable(value = "interest_rate", key = "#id", unless = "#result == null")
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
-        if (optionalInterestRate.isEmpty())
-            throw new InterestRateNotFoundException();
+        if (optionalInterestRate.isEmpty()) {
+            log.info(MessageData.MESSAGE_LOG, MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.INTEREST_RATE_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_NOT_FOUND.getCode());
+        }
         return DataResponseWrapper.builder()
                 .status("00000")
                 .message(util.getMessageFromMessageSource(MessageValue.FIND_SUCCESSFULLY))
@@ -81,12 +87,9 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
-    @CacheEvict(value = "interest_rate",key = "#id")
+    @CacheEvict(value = "interest_rate", key = "#id")
     public DataResponseWrapper<Object> active(String id, String transactionId) {
-        Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
-        if (optionalInterestRate.isEmpty())
-            throw new InterestRateNotFoundException();
-        InterestRate interestRate = optionalInterestRate.get();
+        InterestRate interestRate=getInterestRate(id, transactionId);
         interestRate.setIsActive(!interestRate.getIsActive());
         interestRate.setDateActive(DateUtil.getCurrentTimeUTC7());
         interestRateRepository.save(interestRate);
@@ -98,12 +101,9 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
-    @CacheEvict(value = "interest_rate",key = "#id")
+    @CacheEvict(value = "interest_rate", key = "#id")
     public DataResponseWrapper<Object> update(String id, InterestRateRq interestRateRq, String transactionId) {
-        Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
-        if (optionalInterestRate.isEmpty())
-            throw new InterestRateNotFoundException();
-        InterestRate interestRate = optionalInterestRate.get();
+        InterestRate interestRate=getInterestRate(id, transactionId);
         interestRate.setUnit(Unit.valueOf(interestRateRq.getUnit()));
         interestRate.setInterestRate(interestRateRq.getInterestRate());
         interestRate.setMinimumAmount(interestRateRq.getMinimumAmount());
@@ -118,12 +118,9 @@ public class InterestRateServiceImpl implements IInterestRateService {
     }
 
     @Override
-    @CacheEvict(value = "interest_rate",key = "#id")
+    @CacheEvict(value = "interest_rate", key = "#id")
     public DataResponseWrapper<Object> delete(String id, String transactionId) {
-        Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
-        if (optionalInterestRate.isEmpty())
-            throw new InterestRateNotFoundException();
-        InterestRate interestRate = optionalInterestRate.get();
+        InterestRate interestRate=getInterestRate(id, transactionId);
         interestRate.setIsDeleted(true);
         interestRateRepository.save(interestRate);
         return DataResponseWrapper.builder()
@@ -133,15 +130,24 @@ public class InterestRateServiceImpl implements IInterestRateService {
                 .build();
     }
 
+    private InterestRate getInterestRate(String id, String transactionId) {
+        Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
+        if (optionalInterestRate.isEmpty()) {
+            log.info(MessageData.MESSAGE_LOG, MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.INTEREST_RATE_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_NOT_FOUND.getCode());
+        }
+        return optionalInterestRate.get();
+    }
+
     private InterestRateRp convertToInterestRateRp(InterestRate interestRate) {
         InterestRateRp interestRateRp = new InterestRateRp();
         interestRateRp.setId(interestRate.getId());
-        interestRateRp.setInterestRate(interestRate.getInterestRate().stripTrailingZeros().toPlainString());
+        interestRateRp.setInterestRate(interestRate.getInterestRate().toString());
         interestRateRp.setUnit(interestRate.getUnit().name());
         interestRateRp.setIsActive(interestRate.getIsActive().toString());
         interestRateRp.setMinimumAmount(interestRate.getMinimumAmount().stripTrailingZeros().toPlainString());
         interestRateRp.setMinimumLoanTerm(interestRate.getMinimumLoanTerm().toString());
-        interestRateRp.setDateActive(DateUtil.format(DateUtil.DD_MM_YYY_HH_MM_SLASH,new Date(interestRate.getDateActive().getTime())));
+        interestRateRp.setDateActive(DateUtil.format(DateUtil.DD_MM_YYY_HH_MM_SLASH, new Date(interestRate.getDateActive().getTime())));
         interestRateRp.setCreatedDate(DateUtil.format(DateUtil.DD_MM_YYY_HH_MM_SLASH, Date.from(interestRate.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant())));
         return interestRateRp;
     }

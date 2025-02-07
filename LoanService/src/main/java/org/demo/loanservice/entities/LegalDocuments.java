@@ -31,7 +31,7 @@ import java.sql.Date;
 @Audited
 public class LegalDocuments extends BaseEntity {
     @Column(name = "customer_id")
-    private String customerId;
+    private String cifCode;
     private String description;
     private String urlDocument;
     @ManyToOne(fetch = FetchType.LAZY)

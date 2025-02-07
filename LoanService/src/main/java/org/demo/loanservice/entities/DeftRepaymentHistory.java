@@ -21,7 +21,7 @@ public class DeftRepaymentHistory extends BaseEntity{
     private String paymentDate;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_loan_info_id")
-    private CustomerLoanInfo customerLoanInfoId;
+    private LoanDetailInfo loanDetailInfo;
 
     private Timestamp dueDate;
     private BigDecimal amountRepayment;

@@ -27,7 +27,7 @@ import java.util.Set;
 @Table(name = "tbl_interest_rate")
 @Audited
 public class InterestRate extends BaseEntity {
-    private BigDecimal interestRate;
+    private Double interestRate;
     @Enumerated(EnumType.STRING)
     private Unit unit;
     private Timestamp dateActive;

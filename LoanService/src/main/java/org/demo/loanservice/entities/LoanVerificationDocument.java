@@ -29,14 +29,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Audited
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "loan_verification_documents")
+@Table(name = "tbl_loan_verification_documents")
 public class LoanVerificationDocument {
     @EmbeddedId
     private LoanVerificationDocumentId id;
-    @MapsId("customerLoanInfoId")
+    @MapsId("loanDetailInfoId")
     @ManyToOne
-    @JoinColumn(name = "customer_loan_info_id")
-    private CustomerLoanInfo customerLoanInfo;
+    @JoinColumn(name = "loan_detail_info_id")
+    private LoanDetailInfo loanDetailInfo;
 
     @MapsId("legalDocumentsId")
     @ManyToOne

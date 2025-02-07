@@ -13,6 +13,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoanVerificationDocumentId implements Serializable {
-    private String customerLoanInfoId;
+    private String loanDetailInfoId;
     private String legalDocumentsId;
 }

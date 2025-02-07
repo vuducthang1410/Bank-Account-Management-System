@@ -1,9 +1,12 @@
 package org.demo.loanservice.services.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
-import org.demo.loanservice.controllers.exception.InterestRateNotFoundException;
+import org.demo.loanservice.common.MessageData;
+import org.demo.loanservice.controllers.exception.DataNotFoundException;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanType;
 import org.demo.loanservice.dto.request.LoanProductRq;
@@ -34,14 +37,15 @@ import java.util.Optional;
 public class LoanProductServiceImpl implements ILoanProductService {
     private final LoanProductRepository loanProductRepository;
     private final InterestRateRepository interestRateRepository;
-
+    private final Logger log= LogManager.getLogger(LoanProductServiceImpl.class);
     @Override
     @Transactional
     public DataResponseWrapper<Object> save(LoanProductRq loanProductRq, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository
                 .findInterestRateByIdAndIsDeleted(loanProductRq.getInterestRateId(), false);
         if (optionalInterestRate.isEmpty()) {
-            throw new InterestRateNotFoundException();
+            log.info(MessageData.MESSAGE_LOG,MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(),transactionId);
+            throw new DataNotFoundException(MessageData.INTEREST_RATE_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_NOT_FOUND.getCode());
         }
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setLoanLimit(loanProductRq.getLoanLimit());
@@ -68,7 +72,8 @@ public class LoanProductServiceImpl implements ILoanProductService {
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
         Optional<LoanProduct> optionalLoanProduct = loanProductRepository.findByIdAndIsDeleted(id, false);
         if (optionalLoanProduct.isEmpty()) {
-            throw new InterestRateNotFoundException();
+            log.info(MessageData.MESSAGE_LOG,MessageData.LOAN_PRODUCT_NOT_FOUNT.getMessageLog(),transactionId);
+            throw new DataNotFoundException(MessageData.LOAN_PRODUCT_NOT_FOUNT.getKeyMessage(), MessageData.LOAN_PRODUCT_NOT_FOUNT.getCode());
         }
         LoanProductRp loanProductRp = convertToLoanProductRp(optionalLoanProduct.get());
         return DataResponseWrapper.builder()
@@ -81,10 +86,10 @@ public class LoanProductServiceImpl implements ILoanProductService {
     @Override
     public DataResponseWrapper<Object> getAll(Integer pageNumber, Integer pageSize, String transactionId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
-        Page<LoanProduct> loanProductPage = loanProductRepository.findAllByIsDeleted(false,pageable);
-        Map<String,Object> dataResponse = new HashMap<>();
+        Page<LoanProduct> loanProductPage = loanProductRepository.findAllByIsDeleted(false, pageable);
+        Map<String, Object> dataResponse = new HashMap<>();
         dataResponse.put("totalRecords", loanProductPage.getTotalElements());
-        List<LoanProductRp> loanProductRpList=loanProductPage.getContent()
+        List<LoanProductRp> loanProductRpList = loanProductPage.getContent()
                 .stream()
                 .map(this::convertToLoanProductRp)
                 .toList();
@@ -111,12 +116,13 @@ public class LoanProductServiceImpl implements ILoanProductService {
     public DataResponseWrapper<Object> delete(String id, String transactionId) {
         Optional<LoanProduct> optionalLoanProduct = loanProductRepository.findByIdAndIsDeleted(id, false);
         if (optionalLoanProduct.isEmpty()) {
-            throw new InterestRateNotFoundException();
+            log.info(MessageData.MESSAGE_LOG,MessageData.LOAN_PRODUCT_NOT_FOUNT.getMessageLog(),transactionId);
+            throw new DataNotFoundException(MessageData.LOAN_PRODUCT_NOT_FOUNT.getKeyMessage(), MessageData.LOAN_PRODUCT_NOT_FOUNT.getCode());
         }
         LoanProduct loanProduct = optionalLoanProduct.get();
         loanProduct.setIsDeleted(true);
         loanProductRepository.save(loanProduct);
-      return DataResponseWrapper.builder()
+        return DataResponseWrapper.builder()
                 .data(loanProduct.getId())
                 .message("successfully")
                 .status("200")
@@ -138,7 +144,7 @@ public class LoanProductServiceImpl implements ILoanProductService {
         loanProductRp.setApplicableObjects(loanProduct.getApplicableObjects().name());
         loanProductRp.setFormLoan(loanProduct.getFormLoan().name());
         loanProductRp.setLoanLimit(loanProduct.getLoanLimit().toPlainString());
-        loanProductRp.setInterestRate(loanProduct.getInterestRate().getInterestRate().toPlainString());
+        loanProductRp.setInterestRate(loanProduct.getInterestRate().getInterestRate().toString());
         loanProductRp.setInterestRateUnit(loanProduct.getInterestRate().getUnit().name());
         loanProductRp.setTermLimit(loanProduct.getTermLimit());
         if (loanProduct.getUtilities() != null) {

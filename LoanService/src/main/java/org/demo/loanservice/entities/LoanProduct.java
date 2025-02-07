@@ -79,7 +79,5 @@ public class LoanProduct extends BaseEntity {
     private Integer termLimit;
     @Enumerated(EnumType.STRING)
     private Unit unit;
-//    @OneToMany(mappedBy = "loanProduct")
-//    private List<LoanTerm> loanTermList;
 }
 
