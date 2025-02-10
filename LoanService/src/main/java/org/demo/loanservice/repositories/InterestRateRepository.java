@@ -5,9 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface InterestRateRepository extends JpaRepository<InterestRate, String> {
     Optional<InterestRate> findInterestRateByIdAndIsDeleted(String id, boolean isDeleted);
     Page<InterestRate> findAllByIsDeleted(boolean isDeleted, Pageable pageable);
+    Optional<InterestRate> findFirstByMinimumAmountLessThanEqualOrderByMinimumAmount(BigDecimal minimumAmount,Boolean isDeleted);
 }

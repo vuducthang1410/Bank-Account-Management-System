@@ -54,7 +54,7 @@ public class FormDeftRepaymentServiceImpl implements IFormDeftRepaymentService {
     @Override
     @Cacheable(value = "form_deft_repayment", key = "#id", unless = "#result == null")
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
-        FormDeftRepayment formDeftRepayment=getFormDeftRepayment(id);
+        FormDeftRepayment formDeftRepayment=getFormDeftRepaymentById(id,transactionId);
         FormDeftRepaymentRp formDeftRepaymentRp = convertToRp(formDeftRepayment);
         return DataResponseWrapper.builder()
                 .data(formDeftRepaymentRp)
@@ -83,7 +83,7 @@ public class FormDeftRepaymentServiceImpl implements IFormDeftRepaymentService {
     @Override
     @CacheEvict(value = "form_deft_repayment", key = "#id")
     public DataResponseWrapper<Object> active(String id, String transactionId) {
-        FormDeftRepayment formDeftRepayment=getFormDeftRepayment(id);
+        FormDeftRepayment formDeftRepayment=getFormDeftRepaymentById(id,transactionId);
         formDeftRepayment.setIsActive(!formDeftRepayment.getIsActive());
         formDeftRepaymentRepository.save(formDeftRepayment);
         return DataResponseWrapper.builder()
@@ -93,14 +93,6 @@ public class FormDeftRepaymentServiceImpl implements IFormDeftRepaymentService {
                 .build();
     }
 
-    private FormDeftRepayment getFormDeftRepayment(String id) {
-        Optional<FormDeftRepayment> optionalFormDeftRepayment = formDeftRepaymentRepository.findByIdAndIsDeleted(id, false);
-        if (optionalFormDeftRepayment.isEmpty()) {
-            log.info(MessageData.FORM_DEFT_REPAYMENT_NOT_FOUNT.getMessageLog());
-            throw new DataNotFoundException(MessageData.FORM_DEFT_REPAYMENT_NOT_FOUNT.getKeyMessage(), MessageData.FORM_DEFT_REPAYMENT_NOT_FOUNT.getCode());
-        }
-        return optionalFormDeftRepayment.get();
-    }
 
     @Override
     public DataResponseWrapper<Object> update(String id, FormDeftRepaymentRq formDeftRepaymentRq, String transactionId) {
@@ -110,7 +102,7 @@ public class FormDeftRepaymentServiceImpl implements IFormDeftRepaymentService {
     @Override
     @CacheEvict(value = "form_deft_repayment", key = "#id")
     public DataResponseWrapper<Object> delete(String id, String transactionId) {
-        FormDeftRepayment formDeftRepayment=getFormDeftRepayment(id);
+        FormDeftRepayment formDeftRepayment=getFormDeftRepaymentById(id,transactionId);
         formDeftRepayment.setIsDeleted(true);
         formDeftRepaymentRepository.save(formDeftRepayment);
         return DataResponseWrapper.builder()
@@ -127,5 +119,15 @@ public class FormDeftRepaymentServiceImpl implements IFormDeftRepaymentService {
         formDeftRepaymentRp.setIsActive(formDeftRepayment.getIsActive());
         formDeftRepaymentRp.setCode(formDeftRepayment.getCode().name());
         return formDeftRepaymentRp;
+    }
+
+    @Override
+    public FormDeftRepayment getFormDeftRepaymentById(String id,String transactionId) {
+        Optional<FormDeftRepayment> formDeftRepaymentOptional = formDeftRepaymentRepository.findByIdAndIsDeleted(id, false);
+        if (formDeftRepaymentOptional.isEmpty()) {
+            log.info(MessageData.MESSAGE_LOG, MessageData.LOAN_AMOUNT_LARGER_LOAN_LIMIT.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.FORM_DEFT_REPAYMENT_NOT_FOUNT.getKeyMessage(), MessageData.FORM_DEFT_REPAYMENT_NOT_FOUNT.getCode());
+        }
+        return formDeftRepaymentOptional.get();
     }
 }

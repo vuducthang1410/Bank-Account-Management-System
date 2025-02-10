@@ -7,13 +7,13 @@ import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
 import org.demo.loanservice.common.MessageData;
 import org.demo.loanservice.controllers.exception.DataNotFoundException;
+import org.demo.loanservice.dto.MapToDto;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanType;
 import org.demo.loanservice.dto.request.LoanProductRq;
+import org.demo.loanservice.dto.response.InterestRateRp;
 import org.demo.loanservice.dto.response.LoanProductRp;
-import org.demo.loanservice.entities.InterestRate;
 import org.demo.loanservice.entities.LoanProduct;
-import org.demo.loanservice.repositories.InterestRateRepository;
 import org.demo.loanservice.repositories.LoanProductRepository;
 import org.demo.loanservice.services.ILoanProductService;
 import org.springframework.cache.annotation.CacheEvict;
@@ -36,24 +36,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LoanProductServiceImpl implements ILoanProductService {
     private final LoanProductRepository loanProductRepository;
-    private final InterestRateRepository interestRateRepository;
-    private final Logger log= LogManager.getLogger(LoanProductServiceImpl.class);
+    private final Logger log = LogManager.getLogger(LoanProductServiceImpl.class);
+
     @Override
     @Transactional
     public DataResponseWrapper<Object> save(LoanProductRq loanProductRq, String transactionId) {
-        Optional<InterestRate> optionalInterestRate = interestRateRepository
-                .findInterestRateByIdAndIsDeleted(loanProductRq.getInterestRateId(), false);
-        if (optionalInterestRate.isEmpty()) {
-            log.info(MessageData.MESSAGE_LOG,MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(),transactionId);
-            throw new DataNotFoundException(MessageData.INTEREST_RATE_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_NOT_FOUND.getCode());
-        }
         LoanProduct loanProduct = new LoanProduct();
         loanProduct.setLoanLimit(loanProductRq.getLoanLimit());
         loanProduct.setLoanCondition(loanProductRq.getLoanCondition().getBytes(StandardCharsets.UTF_8));
         loanProduct.setNameProduct(loanProductRq.getNameLoanProduct());
         loanProduct.setDescription(loanProductRq.getDescription().getBytes(StandardCharsets.UTF_8));
         loanProduct.setApplicableObjects(ApplicableObjects.valueOf(loanProductRq.getApplicableObjects()));
-        loanProduct.setInterestRate(optionalInterestRate.get());
         loanProduct.setFormLoan(LoanType.valueOf(loanProductRq.getLoanForm()));
         loanProduct.setProductUrlImage("https://example.com/djaiajd.jpg");//todo
         loanProduct.setUtilities(loanProductRq.getUtilities().getBytes(StandardCharsets.UTF_8));
@@ -70,12 +63,8 @@ public class LoanProductServiceImpl implements ILoanProductService {
     @Override
     @Cacheable(value = "loan-product", key = "#id", unless = "#result == null")
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
-        Optional<LoanProduct> optionalLoanProduct = loanProductRepository.findByIdAndIsDeleted(id, false);
-        if (optionalLoanProduct.isEmpty()) {
-            log.info(MessageData.MESSAGE_LOG,MessageData.LOAN_PRODUCT_NOT_FOUNT.getMessageLog(),transactionId);
-            throw new DataNotFoundException(MessageData.LOAN_PRODUCT_NOT_FOUNT.getKeyMessage(), MessageData.LOAN_PRODUCT_NOT_FOUNT.getCode());
-        }
-        LoanProductRp loanProductRp = convertToLoanProductRp(optionalLoanProduct.get());
+        LoanProduct loanProduct=getLoanProductById(id,transactionId);
+        LoanProductRp loanProductRp = convertToLoanProductRp(loanProduct);
         return DataResponseWrapper.builder()
                 .data(loanProductRp)
                 .message("successfully")
@@ -114,12 +103,7 @@ public class LoanProductServiceImpl implements ILoanProductService {
     @Override
     @CacheEvict(value = "loan-product", key = "#id")
     public DataResponseWrapper<Object> delete(String id, String transactionId) {
-        Optional<LoanProduct> optionalLoanProduct = loanProductRepository.findByIdAndIsDeleted(id, false);
-        if (optionalLoanProduct.isEmpty()) {
-            log.info(MessageData.MESSAGE_LOG,MessageData.LOAN_PRODUCT_NOT_FOUNT.getMessageLog(),transactionId);
-            throw new DataNotFoundException(MessageData.LOAN_PRODUCT_NOT_FOUNT.getKeyMessage(), MessageData.LOAN_PRODUCT_NOT_FOUNT.getCode());
-        }
-        LoanProduct loanProduct = optionalLoanProduct.get();
+        LoanProduct loanProduct = getLoanProductById(id,transactionId);
         loanProduct.setIsDeleted(true);
         loanProductRepository.save(loanProduct);
         return DataResponseWrapper.builder()
@@ -134,6 +118,16 @@ public class LoanProductServiceImpl implements ILoanProductService {
         return null;
     }
 
+    @Override
+    public LoanProduct getLoanProductById(String id, String transactionId) {
+        Optional<LoanProduct> optionalLoanProduct = loanProductRepository.findByIdAndIsDeleted(id, false);
+        if (optionalLoanProduct.isEmpty()) {
+            log.info(MessageData.MESSAGE_LOG, MessageData.LOAN_PRODUCT_NOT_FOUNT.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.LOAN_PRODUCT_NOT_FOUNT.getKeyMessage(), MessageData.LOAN_PRODUCT_NOT_FOUNT.getCode());
+        }
+        return optionalLoanProduct.get();
+    }
+
     public LoanProductRp convertToLoanProductRp(LoanProduct loanProduct) {
         LoanProductRp loanProductRp = new LoanProductRp();
         loanProductRp.setProductId(loanProduct.getId());
@@ -144,8 +138,8 @@ public class LoanProductServiceImpl implements ILoanProductService {
         loanProductRp.setApplicableObjects(loanProduct.getApplicableObjects().name());
         loanProductRp.setFormLoan(loanProduct.getFormLoan().name());
         loanProductRp.setLoanLimit(loanProduct.getLoanLimit().toPlainString());
-        loanProductRp.setInterestRate(loanProduct.getInterestRate().getInterestRate().toString());
-        loanProductRp.setInterestRateUnit(loanProduct.getInterestRate().getUnit().name());
+        List<InterestRateRp> interestRateRpList = loanProduct.getInterestRateSet().stream().map(MapToDto::convertToInterestRateRp).toList();
+        loanProductRp.setInterestRate(interestRateRpList);
         loanProductRp.setTermLimit(loanProduct.getTermLimit());
         if (loanProduct.getUtilities() != null) {
             loanProductRp.setUtilities(new String(loanProduct.getUtilities(), StandardCharsets.UTF_8));

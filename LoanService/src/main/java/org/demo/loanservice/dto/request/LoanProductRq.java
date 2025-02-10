@@ -10,7 +10,6 @@ public class LoanProductRq {
     private String nameLoanProduct;
     private BigDecimal loanLimit;
     private String description;
-    private String interestRateId;
     private String utilities;
     private String loanCondition;
     private String loanForm;

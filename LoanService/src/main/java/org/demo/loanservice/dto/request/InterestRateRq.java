@@ -26,5 +26,6 @@ public class InterestRateRq {
     private BigDecimal minimumAmount;
     @Min(value = 0)
     private Integer minimumLoanTerm;
+    private String loanProductId;
 
 }

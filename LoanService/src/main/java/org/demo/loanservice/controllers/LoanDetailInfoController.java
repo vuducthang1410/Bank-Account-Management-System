@@ -7,6 +7,8 @@ import org.demo.loanservice.dto.request.IndividualCustomerInfoRq;
 import org.demo.loanservice.services.ILoanDetailInfoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -28,5 +30,13 @@ public class LoanDetailInfoController {
                 individualCustomerInfoRq,
                 transactionId), HttpStatus.OK);
     }
-
+    @PatchMapping("/individual-customer/approve-disbursement/{id}")
+    public ResponseEntity<DataResponseWrapper<Object>> approveIndividualCustomerDisbursement(
+            @PathVariable(name = "id")String id,
+            @RequestHeader(name = "transactionId")String transactionId
+    ){
+        return new ResponseEntity<>(
+                loanDetailInfoService.approveIndividualCustomerDisbursement(id,transactionId)
+                ,HttpStatus.OK);
+    }
 }

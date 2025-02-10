@@ -1,8 +1,11 @@
 package org.demo.loanservice.services.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
+import org.demo.loanservice.common.MessageData;
 import org.demo.loanservice.common.Util;
 import org.demo.loanservice.controllers.exception.DataNotFoundException;
 import org.demo.loanservice.dto.CICResponse;
@@ -46,6 +49,7 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
     private final FinancialInfoRepository financialInfoRepository;
     private final LoanDetailInfoRepository loanDetailInfoRepository;
     private final LegalDocumentsRepository legalDocumentsRepository;
+    private final Logger log= LogManager.getLogger(FinancialInfoServiceImpl.class);
     private final CICService cicService;
     private final Util util;
 
@@ -126,7 +130,8 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
     public DataResponseWrapper<Object> getDetailInfoById(String id, String transactionId) {
         Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIdAndIsDeleted(id, false);
         if (financialInfoOptional.isEmpty()) {
-            throw new DataNotFoundException("","");//todo: handle exception
+            log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_FOUND.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());//todo
         }
         FinancialInfoRp financialInfoRp = convertToFinancialInfoRp(financialInfoOptional.get(), true);
         return DataResponseWrapper.builder()
@@ -142,7 +147,8 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
         Optional<FinancialInfo> financialInfoOptional = financialInfoRepository
                 .findByIdAndIsDeleted(financialInfoRq.getFinancialInfoId(), false);
         if (financialInfoOptional.isEmpty()) {
-            throw new DataNotFoundException("","");//todo: handle exception
+            log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_FOUND.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());//todo
         }
         FinancialInfo financialInfo = financialInfoOptional.get();
         financialInfo.setRequestStatus(RequestStatus.valueOf(financialInfoRq.getStatusFinancialInfo()));
@@ -163,7 +169,8 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
         String customerId="123456789";
         Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIsDeletedAndCifCode(false, customerId);
         if (financialInfoOptional.isEmpty()) {
-            throw new DataNotFoundException("","");
+            log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_FOUND.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());//todo
         }
         Boolean isApprove=financialInfoOptional.get().getRequestStatus().equals(RequestStatus.APPROVED);
         return DataResponseWrapper.builder()
@@ -199,6 +206,15 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
         return financialInfoRp;
     }
 
+    @Override
+    public FinancialInfo getFinancialInfoByCifCode(String cifCode, String transactionId){
+        Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIsDeletedAndCifCode(false, cifCode);
+        if (financialInfoOptional.isEmpty()) {
+            log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_FOUND.getMessageLog(), transactionId);
+            throw new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());//todo
+        }
+        return financialInfoOptional.get();
+    }
     private LegalDocumentRp convertToLegalDocumentRp(LegalDocuments legalDocuments) {
         LegalDocumentRp legalDocumentRp = new LegalDocumentRp();
         legalDocumentRp.setLegalDocumentId(legalDocuments.getId());

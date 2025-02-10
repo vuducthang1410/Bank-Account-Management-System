@@ -3,6 +3,7 @@ package org.demo.loanservice.dto.response;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class LoanProductRp implements Serializable {
@@ -11,7 +12,7 @@ public class LoanProductRp implements Serializable {
     private String productDescription;
     private String formLoan;
     private String loanLimit;
-    private String interestRate;
+    private List<InterestRateRp> interestRate;
     private String interestRateUnit;
     private Integer termLimit;
     private String utilities;

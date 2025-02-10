@@ -1,5 +1,6 @@
 package org.demo.loanservice.config;
 
+import org.demo.loanservice.dto.MapToDto;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

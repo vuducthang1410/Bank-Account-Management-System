@@ -21,14 +21,14 @@ public enum MessageData {
 
 
     FINANCIAL_INFO_NOT_APPROVE("financial_info.not_approve", "Financial info not approve", "30301"),
-    LOAN_AMOUNT_LARGER_LOAN_LIMIT("loan_amount.larger.loan_limit","Loan amount larger than loan limit: loan limit= {}", "30302"),
-
+    LOAN_AMOUNT_LARGER_LOAN_LIMIT("loan_amount.larger.loan_limit","Loan amount larger than loan amount limit: loan amount limit= {}", "30302"),
+    LOAN_TERM_LARGER_THAN_LIMIT("loan_term.larger.loan_term_limit","Loan term larger than loan term limit: loan term limit= {}", "30303"),
     DATA_NOT_FOUND("data.notFound", "Data not found", "40400"),
     INTEREST_RATE_NOT_FOUND("interest_rate.not_found", "Interest rate not found", "40401"),
     FORM_DEFT_REPAYMENT_NOT_FOUNT("form_deft_repayment.not_found","Form deft_repayment not found", "40402"),
     LOAN_PRODUCT_NOT_FOUNT("loan_product.not_found", "Loan product not found", "40403"),
     FINANCIAL_INFO_NOT_FOUND("financial_info.not_found", "Financial info not found", "40404"),
-
+    LOAN_DETAIL_INFO_NOT_FOUND("loan_detail_info.not_found", "Loan detail info not found:: id={}", "40405"),
 
 
     SERVER_ERROR("server.error.message", "Internal server error", "50000");
