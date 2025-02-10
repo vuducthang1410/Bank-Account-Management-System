@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
+import org.demo.loanservice.common.Util;
 import org.demo.loanservice.dto.request.LoanProductRq;
 import org.demo.loanservice.services.ILoanProductService;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @Schema
-@RequestMapping("/loan-product")
+@RequestMapping(Util.API_RESOURCE+"/loan-product")
 public class LoanProductController {
     private final ILoanProductService loanProductService;
 

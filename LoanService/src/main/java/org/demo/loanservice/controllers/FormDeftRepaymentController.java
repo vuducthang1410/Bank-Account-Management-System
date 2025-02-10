@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
+import org.demo.loanservice.common.Util;
 import org.demo.loanservice.dto.request.FormDeftRepaymentRq;
 import org.demo.loanservice.services.IFormDeftRepaymentService;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/form-deft-repayment")
+@RequestMapping(Util.API_RESOURCE+"/form-deft-repayment")
 @Schema(description = "FormDeftRepaymentController")
 public class FormDeftRepaymentController {
     private final IFormDeftRepaymentService formDeftRepaymentService;

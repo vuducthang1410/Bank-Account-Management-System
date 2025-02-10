@@ -2,6 +2,7 @@ package org.demo.loanservice.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
+import org.demo.loanservice.common.Util;
 import org.demo.loanservice.dto.request.ApproveFinancialInfoRq;
 import org.demo.loanservice.dto.request.FinancialInfoRq;
 import org.demo.loanservice.services.IFinancialInfoService;
@@ -23,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/financial-info")
+@RequestMapping(Util.API_RESOURCE+"/financial-info")
 public class FinancialInfoController {
     private final IFinancialInfoService financialInfoService;
 

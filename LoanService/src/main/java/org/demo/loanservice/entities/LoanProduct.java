@@ -56,10 +56,8 @@ public class LoanProduct extends BaseEntity {
 
     @Schema(description = "The interest rate ID associated with this loan product," +
             " linking to the interest rate table.")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interest_rate_id")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private InterestRate interestRate;
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "loanProduct")
+    private Set<InterestRate> interestRateSet;
 
     @Schema(description = "Utility services associated with the loan product, " +
             "which may include insurance, financial planning services, etc.")

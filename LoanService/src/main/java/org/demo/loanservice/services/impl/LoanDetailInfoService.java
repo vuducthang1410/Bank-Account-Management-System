@@ -45,11 +45,13 @@ public class LoanDetailInfoService implements ILoanDetailInfoService {
     @Override
     public DataResponseWrapper<Object> registerIndividualCustomerLoan(IndividualCustomerInfoRq individualCustomerInfoRq, String transactionId) {
         String cifCode = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
         Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIsDeletedAndCifCode(false, cifCode);
         if (financialInfoOptional.isEmpty()) {
             log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_FOUND.getMessageLog(), transactionId);
             throw new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());//todo
         }
+
         FinancialInfo financialInfo = financialInfoOptional.get();
         if (!financialInfo.getRequestStatus().equals(RequestStatus.APPROVED)) {
             log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_APPROVE.getMessageLog(), transactionId);
@@ -69,6 +71,7 @@ public class LoanDetailInfoService implements ILoanDetailInfoService {
         if (loanProduct.getTermLimit().compareTo(individualCustomerInfoRq.getLoanTerm()) < 0) {
             throw new DataNotValidException(MessageData.LOAN_AMOUNT_LARGER_LOAN_LIMIT.getKeyMessage(), MessageData.LOAN_AMOUNT_LARGER_LOAN_LIMIT.getCode());//todo handler
         }
+
         Optional<FormDeftRepayment> formDeftRepaymentOptional = formDeftRepaymentRepository.findByIdAndIsDeleted(individualCustomerInfoRq.getFormDeftRepaymentId(), false);
         if (formDeftRepaymentOptional.isEmpty()) {
             log.info(MessageData.MESSAGE_LOG, MessageData.LOAN_AMOUNT_LARGER_LOAN_LIMIT.getMessageLog(), transactionId);

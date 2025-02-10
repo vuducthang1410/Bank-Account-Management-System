@@ -1,4 +1,4 @@
-package org.demo.loanservice.controllers;
+package org.demo.loanservice.controllers.exception;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.MessageValue;
 import org.demo.loanservice.common.Util;
-import org.demo.loanservice.controllers.exception.DataNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -13,9 +13,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateUtil {
-//    public static final String YYYY_MM_DD_HYPHEN="yyyy-MM-dd";
-//    public static final String FULL_DATE="HH:mm dd/MM/yyyy";
-//    public static final String DD_MM_YYYY_SLASH="dd/MM/yyyy";
+    public static final String YYYY_MM_DD_HYPHEN="yyyy-MM-dd";
+    public static final String FULL_DATE="HH:mm dd/MM/yyyy";
+    public static final String DD_MM_YYYY_SLASH="dd/MM/yyyy";
     public static final String DD_MM_YYY_HH_MM_SLASH="dd/MM/yyyy HH:mm";
     public static final String YYYY_MM_DD_HH_MM_SS="yyyy/MM/dd HH:mm:ss";
     private static final Logger log = LoggerFactory.getLogger(DateUtil.class);

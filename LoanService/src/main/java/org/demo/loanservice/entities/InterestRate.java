@@ -4,6 +4,8 @@ package org.demo.loanservice.entities;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -34,6 +36,7 @@ public class InterestRate extends BaseEntity {
     private Boolean isActive;
     private BigDecimal minimumAmount;
     private Integer minimumLoanTerm;
-    @OneToMany(mappedBy = "interestRate")
-    private Set<LoanProduct> loanProducts;
+    @ManyToOne
+    @JoinColumn(name = "loan_product_id")
+    private LoanProduct loanProduct;
 }

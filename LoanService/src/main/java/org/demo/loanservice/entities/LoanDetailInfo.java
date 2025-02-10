@@ -47,9 +47,12 @@ public class LoanDetailInfo extends BaseEntity {
     private Integer loanTerm;
     @Enumerated(EnumType.STRING)
     private Unit unit;
-    private String reasonRefuse;
+    private String note;
 
     private Double interestRate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loan_detail_info")
+    private FinancialInfo financialInfo;
 
     @OneToMany(mappedBy = "loanDetailInfo")
     private Set<DeftRepaymentHistory> deftRepaymentHistorySet;

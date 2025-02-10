@@ -2,6 +2,7 @@ package org.demo.loanservice.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
+import org.demo.loanservice.common.Util;
 import org.demo.loanservice.dto.request.IndividualCustomerInfoRq;
 import org.demo.loanservice.services.ILoanDetailInfoService;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/loan-detail-info")
+@RequestMapping(Util.API_RESOURCE+"/loan-detail-info")
 public class LoanDetailInfoController {
     private final ILoanDetailInfoService loanDetailInfoService;
 

@@ -1,6 +1,5 @@
 package org.demo.loanservice.entities;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.demo.loanservice.dto.enumDto.DeftRepaymentStatus;

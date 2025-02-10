@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
+import org.demo.loanservice.common.Util;
 import org.demo.loanservice.dto.request.InterestRateRq;
 import org.demo.loanservice.services.IInterestRateService;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("interest-rate")
+@RequestMapping(Util.API_RESOURCE+"/interest-rate")
 @RequiredArgsConstructor
 public class InterestRateController {
     private final IInterestRateService interestRateService;
