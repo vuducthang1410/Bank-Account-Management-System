@@ -7,17 +7,17 @@ import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
 import org.demo.loanservice.common.MessageData;
 import org.demo.loanservice.controllers.exception.DataNotFoundException;
-import org.demo.loanservice.dto.MapToDto;
+import org.demo.loanservice.dto.MapEntityToDto;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanType;
 import org.demo.loanservice.dto.request.LoanProductRq;
 import org.demo.loanservice.dto.response.InterestRateRp;
 import org.demo.loanservice.dto.response.LoanProductRp;
+import org.demo.loanservice.entities.InterestRate;
 import org.demo.loanservice.entities.LoanProduct;
 import org.demo.loanservice.repositories.LoanProductRepository;
+import org.demo.loanservice.services.IInterestRateService;
 import org.demo.loanservice.services.ILoanProductService;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,15 +27,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LoanProductServiceImpl implements ILoanProductService {
     private final LoanProductRepository loanProductRepository;
+    private final IInterestRateService interestRateService;
     private final Logger log = LogManager.getLogger(LoanProductServiceImpl.class);
 
     @Override
@@ -61,10 +64,10 @@ public class LoanProductServiceImpl implements ILoanProductService {
     }
 
     @Override
-    @Cacheable(value = "loan-product", key = "#id", unless = "#result == null")
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
-        LoanProduct loanProduct=getLoanProductById(id,transactionId);
-        LoanProductRp loanProductRp = convertToLoanProductRp(loanProduct);
+        LoanProduct loanProduct = getLoanProductById(id, transactionId);
+        List<InterestRate> interestRateList=interestRateService.interestRateList(List.of(loanProduct.getId()));
+        LoanProductRp loanProductRp = convertToLoanProductRp(loanProduct, interestRateList);
         return DataResponseWrapper.builder()
                 .data(loanProductRp)
                 .message("successfully")
@@ -74,18 +77,46 @@ public class LoanProductServiceImpl implements ILoanProductService {
 
     @Override
     public DataResponseWrapper<Object> getAll(Integer pageNumber, Integer pageSize, String transactionId) {
+        // Create a Pageable object with sorting by createdDate in descending order
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
+
+        // Retrieve a paginated list of LoanProduct entities that are not deleted
         Page<LoanProduct> loanProductPage = loanProductRepository.findAllByIsDeleted(false, pageable);
+        List<LoanProduct> loanProductList = loanProductPage.getContent();
+        log.info("Fetched LoanProduct list: {} records", loanProductList.size());
+
+        // Extract the IDs of the retrieved LoanProduct entities
+        List<String> loanProductIdList = loanProductList.stream().map(LoanProduct::getId).toList();
+        log.debug("LoanProduct ID list: {}", loanProductIdList);
+
+        // Retrieve the list of InterestRate entities associated with the LoanProduct IDs
+        List<InterestRate> interestRateList = interestRateService.interestRateList(loanProductIdList);
+        log.info("Fetched InterestRate list: {} records", interestRateList.size());
+
+        // Group InterestRate entities by LoanProduct ID
+        Map<String, List<InterestRate>> interestRateMap = interestRateList.stream()
+                .collect(Collectors.groupingBy(ir -> ir.getLoanProduct().getId()));
+        log.debug("InterestRate map created with {} entries", interestRateMap.size());
+
+        // Prepare response data
         Map<String, Object> dataResponse = new HashMap<>();
         dataResponse.put("totalRecords", loanProductPage.getTotalElements());
-        List<LoanProductRp> loanProductRpList = loanProductPage.getContent()
+
+        // Convert LoanProduct entities to LoanProductRp response objects
+        List<LoanProductRp> loanProductRpList = loanProductList
                 .stream()
-                .map(this::convertToLoanProductRp)
-                .toList();
+                .map(loanProduct -> {
+                    List<InterestRate> interestRateListById = interestRateMap.getOrDefault(loanProduct.getId(), new ArrayList<>());
+                    return convertToLoanProductRp(loanProduct, interestRateListById);
+                }).toList();
         dataResponse.put("loanProductRpList", loanProductRpList);
+
+        log.info("Successfully processed {} LoanProductRp records", loanProductRpList.size());
+
+        // Return the wrapped response
         return DataResponseWrapper.builder()
                 .data(dataResponse)
-                .message("successfully")
+                .message("Successfully retrieved loan products")
                 .status("200")
                 .build();
     }
@@ -101,9 +132,8 @@ public class LoanProductServiceImpl implements ILoanProductService {
     }
 
     @Override
-    @CacheEvict(value = "loan-product", key = "#id")
     public DataResponseWrapper<Object> delete(String id, String transactionId) {
-        LoanProduct loanProduct = getLoanProductById(id,transactionId);
+        LoanProduct loanProduct = getLoanProductById(id, transactionId);
         loanProduct.setIsDeleted(true);
         loanProductRepository.save(loanProduct);
         return DataResponseWrapper.builder()
@@ -128,18 +158,35 @@ public class LoanProductServiceImpl implements ILoanProductService {
         return optionalLoanProduct.get();
     }
 
-    public LoanProductRp convertToLoanProductRp(LoanProduct loanProduct) {
+    /**
+     * Converts a LoanProduct entity to a LoanProductRp DTO.
+     *
+     * @param loanProduct      The LoanProduct entity to be converted.
+     * @param interestRateList list containing lists of InterestRate entities of loan product
+     * @return A LoanProductRp object representing the converted data.
+     */
+    public LoanProductRp convertToLoanProductRp(LoanProduct loanProduct, List<InterestRate> interestRateList) {
         LoanProductRp loanProductRp = new LoanProductRp();
         loanProductRp.setProductId(loanProduct.getId());
         loanProductRp.setProductName(loanProduct.getNameProduct());
+        // Convert and set product description if it exists
         if (loanProduct.getDescription() != null) {
             loanProductRp.setProductDescription(new String(loanProduct.getDescription(), StandardCharsets.UTF_8));
         }
         loanProductRp.setApplicableObjects(loanProduct.getApplicableObjects().name());
         loanProductRp.setFormLoan(loanProduct.getFormLoan().name());
         loanProductRp.setLoanLimit(loanProduct.getLoanLimit().toPlainString());
-        List<InterestRateRp> interestRateRpList = loanProduct.getInterestRateSet().stream().map(MapToDto::convertToInterestRateRp).toList();
-        loanProductRp.setInterestRate(interestRateRpList);
+
+        // Retrieve and convert interest rate data if the map is provided
+        log.debug("interest rate list: {}", interestRateList);
+        if (interestRateList != null && !interestRateList.isEmpty()) {
+            log.debug("Set {} InterestRate records for LoanProduct ID: {}", interestRateList.size(), loanProduct.getId());
+            // Convert InterestRate entities to DTOs
+            List<InterestRateRp> interestRateRpList = interestRateList.stream()
+                    .map(MapEntityToDto::convertToInterestRateRp)
+                    .toList();
+            loanProductRp.setInterestRate(interestRateRpList);
+        }
         loanProductRp.setTermLimit(loanProduct.getTermLimit());
         if (loanProduct.getUtilities() != null) {
             loanProductRp.setUtilities(new String(loanProduct.getUtilities(), StandardCharsets.UTF_8));
@@ -148,7 +195,9 @@ public class LoanProductServiceImpl implements ILoanProductService {
         if (loanProduct.getLoanCondition() != null) {
             loanProductRp.setLoanCondition(new String(loanProduct.getLoanCondition(), StandardCharsets.UTF_8));
         }
+        // Format and set the created date as a string
         loanProductRp.setCreatedDate(DateUtil.format(DateUtil.YYYY_MM_DD_HH_MM_SS, loanProduct.getCreatedDate()));
         return loanProductRp;
     }
+
 }

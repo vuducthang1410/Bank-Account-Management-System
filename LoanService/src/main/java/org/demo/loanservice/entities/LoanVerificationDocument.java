@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 @Table(name = "tbl_loan_verification_documents")
 public class LoanVerificationDocument {
     @EmbeddedId
-    private LoanVerificationDocumentId id;
+    private LoanVerificationDocumentId id = new LoanVerificationDocumentId();
     @MapsId("loanDetailInfoId")
     @ManyToOne
     @JoinColumn(name = "loan_detail_info_id")

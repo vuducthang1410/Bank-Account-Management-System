@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface FinancialInfoRepository extends JpaRepository<FinancialInfo, String> {
     Page<FinancialInfo> findAllByIsDeletedAndRequestStatus(Boolean isDeleted, RequestStatus isApproved, Pageable pageable);
     Optional<FinancialInfo> findByIdAndIsDeleted(String id, Boolean isDeleted);
-    Optional<FinancialInfo> findByIsDeletedAndCifCode(Boolean isDeleted,String cifCode);
+    Optional<FinancialInfo> findByIsDeletedAndCustomerId(Boolean isDeleted,String customerId);
 
 }

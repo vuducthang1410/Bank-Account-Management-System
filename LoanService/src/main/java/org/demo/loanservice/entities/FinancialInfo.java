@@ -30,8 +30,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "tbl_financial_info")
 public class FinancialInfo extends BaseEntity{
-    @Column(name = "cif_code")
-    private String  cifCode;
+    @Column(name = "customer_id")
+    private String  customerId;
     private String income;
     @Enumerated(EnumType.STRING)
     private Unit unit;
@@ -47,6 +47,7 @@ public class FinancialInfo extends BaseEntity{
     private String debtStatus;
     private Date expiredDate;
     private Boolean isExpired;
+    private BigDecimal loanAmountMax;
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 

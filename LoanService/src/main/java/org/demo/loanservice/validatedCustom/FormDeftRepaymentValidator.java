@@ -15,8 +15,7 @@ public class FormDeftRepaymentValidator implements ConstraintValidator<FormDeftR
 
         return Stream.of(
                 FormDeftRepaymentEnum.PRINCIPAL_AND_INTEREST_MONTHLY.name(),
-                FormDeftRepaymentEnum.PRINCIPAL_INTEREST_INITIAL.name(),
-                FormDeftRepaymentEnum.PRINCIPAL_QUARTERLY_INTEREST_MONTHLY.name())
+                FormDeftRepaymentEnum.PRINCIPAL_INTEREST_DECREASING.name())
                 .anyMatch(name->name.equalsIgnoreCase(value));
     }
 }

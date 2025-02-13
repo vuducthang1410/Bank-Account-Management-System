@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtil {
@@ -44,8 +45,27 @@ public class DateUtil {
     }
     public static Date getDateOfAfterNMonth(int n){
         LocalDate currentDate = LocalDate.now();
-        LocalDate dateAfter3Months = currentDate.plusMonths(n);
-        return Date.from(dateAfter3Months.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        LocalDate dateAfterNMonths = currentDate.plusMonths(n);
+        return Date.from(dateAfterNMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+    public static Timestamp getDateAfterNDay(int n){
+        return Timestamp.valueOf(LocalDate.now().plusDays(n).atStartOfDay());
+    }
+    public static Timestamp getDateAfterNDay(int n, Timestamp dateBegin) {
+        if (dateBegin == null) {
+            throw new IllegalArgumentException("dateBegin cannot be null");
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateBegin);
+        calendar.add(Calendar.DAY_OF_MONTH, n);
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+    public static Timestamp getDateAfterNMonths(int n) {
+        return Timestamp.valueOf(LocalDate.now().plusDays(1).plusMonths(n).atStartOfDay());
+    }
+    public static Timestamp getDateAfterNMinute(int n){
+        return Timestamp.valueOf(LocalDateTime.now().plusMinutes(n));
     }
     public static Timestamp convertStringToTimeStamp(String timeString){
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;

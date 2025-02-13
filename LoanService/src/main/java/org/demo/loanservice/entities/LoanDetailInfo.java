@@ -1,5 +1,6 @@
 package org.demo.loanservice.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.demo.loanservice.dto.enumDto.FormDeftRepaymentEnum;
 import org.demo.loanservice.dto.enumDto.LoanStatus;
 import org.demo.loanservice.dto.enumDto.RequestStatus;
 import org.demo.loanservice.dto.enumDto.Unit;
@@ -31,10 +33,9 @@ import java.util.Set;
 @Table(name = "tbl_loan_detail_info")
 @Audited
 public class LoanDetailInfo extends BaseEntity {
-    private String cifCode;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "form_deft_repayment_id")
-    private FormDeftRepayment formDeftRepaymentId;
+    @Column(name = "form_deft_repayment")
+    @Enumerated(EnumType.STRING)
+    private FormDeftRepaymentEnum formDeftRepayment;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_product_id")
     private LoanProduct loanProductId;
@@ -51,12 +52,11 @@ public class LoanDetailInfo extends BaseEntity {
 
     private Double interestRate;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "loan_detail_info")
+    @JoinColumn(name = "financial_info_id")
     private FinancialInfo financialInfo;
 
     @OneToMany(mappedBy = "loanDetailInfo")
-    private Set<DeftRepaymentHistory> deftRepaymentHistorySet;
-
+    private Set<PaymentSchedule> paymentScheduleSet;
     // todo: Persist financial information
     private Integer creditScore;
     private String income;
@@ -65,4 +65,5 @@ public class LoanDetailInfo extends BaseEntity {
     private String debtStatus;
     private Timestamp lastUpdatedCreditReview;
 
+    private String loanAccountId;
 }

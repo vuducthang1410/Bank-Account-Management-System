@@ -6,7 +6,7 @@ import org.demo.loanservice.entities.InterestRate;
 
 import java.time.ZoneId;
 import java.util.Date;
-public class MapToDto {
+public class MapEntityToDto {
     public static InterestRateRp convertToInterestRateRp(InterestRate interestRate) {
         InterestRateRp interestRateRp = new InterestRateRp();
         interestRateRp.setId(interestRate.getId());

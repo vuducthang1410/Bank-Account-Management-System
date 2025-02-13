@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.demo.loanservice.common.DataResponseWrapper;
-import org.demo.loanservice.common.MessageValue;
+import org.demo.loanservice.common.MessageData;
 import org.demo.loanservice.common.Util;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -33,38 +33,56 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
-        return createdResponse(errorList, util.getMessageFromMessageSource(MessageValue.INVALID_DATA), "00000", HttpStatus.BAD_REQUEST);
+        return createdResponse(errorList, util.getMessageFromMessageSource(MessageData.INVALID_DATA.getKeyMessage()), "00000", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<DataResponseWrapper<Object>> handlerMissingParameterException(MissingServletRequestParameterException ex) {
-        return createdResponse(util.getMessageFromMessageSource(MessageValue.MISSING_PARAMETER) + ex.getParameterName(),
-                util.getMessageFromMessageSource(MessageValue.MISSING_PARAMETER),
+        return createdResponse(util.getMessageFromMessageSource(MessageData.MISSING_PARAMETER.getKeyMessage()) + ex.getParameterName(),
+                util.getMessageFromMessageSource(MessageData.MISSING_PARAMETER.getKeyMessage()),
                 "4000",
                 HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<DataResponseWrapper<Object>> handlerMissingRequestHeaderException(MissingRequestHeaderException ex) {
-        return createdResponse(util.getMessageFromMessageSource(MessageValue.MISSING_PARAMETER_IN_HEADER) + ex.getParameter().getParameterName(),
-                util.getMessageFromMessageSource(MessageValue.MISSING_PARAMETER),
+        return createdResponse(util.getMessageFromMessageSource(MessageData.MISSING_PARAMETER_IN_HEADER.getKeyMessage()) + ex.getParameter().getParameterName(),
+                util.getMessageFromMessageSource(MessageData.MISSING_PARAMETER.getKeyMessage()),
                 "4000",
                 HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataNotFoundException.class)
     public ResponseEntity<DataResponseWrapper<Object>> handlerInDataNotFoundException(DataNotFoundException ex) {
+        String data = util.getMessageFromMessageSource(ex.getMessageKey());
         return createdResponse(util.getMessageFromMessageSource(ex.getMessageKey()),
-                util.getMessageFromMessageSource(MessageValue.DATA_NOT_FOUND),
+                util.getMessageFromMessageSource(MessageData.DATA_NOT_FOUND.getKeyMessage()),
                 ex.getCode(),
                 HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataNotValidException.class)
+    public ResponseEntity<DataResponseWrapper<Object>> handlerInDataNotFoundException(DataNotValidException ex) {
+        return createdResponse(util.getMessageFromMessageSource(ex.getMessageKey()),
+                util.getMessageFromMessageSource(MessageData.DATA_NOT_FOUND.getKeyMessage()),
+                ex.getCode(),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ServerErrorException.class)
+    public ResponseEntity<DataResponseWrapper<Object>> handlerServerErrorException(ServerErrorException serverErrorException) {
+        return createdResponse(util.getMessageFromMessageSource(MessageData.SERVER_ERROR.getKeyMessage()),
+                MessageData.SERVER_ERROR.getMessageLog(),
+                MessageData.SERVER_ERROR.getCode(),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<DataResponseWrapper<Object>> handlerNoSuchMessageException(Exception ex) {
         logger.error(ex.getMessage());
-        return createdResponse("Internal_error",
-                util.getMessageFromMessageSource(MessageValue.SERVER_ERROR),
+        return createdResponse(MessageData.SERVER_ERROR.getMessageLog(),
+                util.getMessageFromMessageSource(MessageData.SERVER_ERROR.getKeyMessage()),
                 "4000",
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }

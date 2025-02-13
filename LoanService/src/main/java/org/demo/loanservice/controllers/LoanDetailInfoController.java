@@ -1,9 +1,11 @@
 package org.demo.loanservice.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.Util;
 import org.demo.loanservice.dto.request.IndividualCustomerInfoRq;
+import org.demo.loanservice.dto.request.LoanInfoApprovalRq;
 import org.demo.loanservice.services.ILoanDetailInfoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +32,13 @@ public class LoanDetailInfoController {
                 individualCustomerInfoRq,
                 transactionId), HttpStatus.OK);
     }
-    @PatchMapping("/individual-customer/approve-disbursement/{id}")
+    @PatchMapping("/individual-customer/approve-disbursement")
     public ResponseEntity<DataResponseWrapper<Object>> approveIndividualCustomerDisbursement(
-            @PathVariable(name = "id")String id,
+            @RequestBody LoanInfoApprovalRq loanInfoApprovalRq,
             @RequestHeader(name = "transactionId")String transactionId
     ){
         return new ResponseEntity<>(
-                loanDetailInfoService.approveIndividualCustomerDisbursement(id,transactionId)
+                loanDetailInfoService.approveIndividualCustomerDisbursement(loanInfoApprovalRq,transactionId)
                 ,HttpStatus.OK);
     }
 }

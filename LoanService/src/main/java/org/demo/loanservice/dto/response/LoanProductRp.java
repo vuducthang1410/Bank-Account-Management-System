@@ -13,7 +13,6 @@ public class LoanProductRp implements Serializable {
     private String formLoan;
     private String loanLimit;
     private List<InterestRateRp> interestRate;
-    private String interestRateUnit;
     private Integer termLimit;
     private String utilities;
     private String productUrlImage;

@@ -7,6 +7,7 @@ import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -14,10 +15,11 @@ import java.sql.Timestamp;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tbl_deft_repayment_history")
+@Table(name = "tbl_repayment_payment_schedule")
 @Audited
-public class DeftRepaymentHistory extends BaseEntity{
-    private String paymentDate;
+public class PaymentSchedule extends BaseEntity{
+    private Timestamp paymentInterestDate;
+    private Timestamp paymentScheduleDate;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_loan_info_id")
     private LoanDetailInfo loanDetailInfo;
@@ -25,7 +27,11 @@ public class DeftRepaymentHistory extends BaseEntity{
     private Timestamp dueDate;
     private BigDecimal amountRepayment;
     private Boolean isPaid;
+    private Boolean isPaidInterest;
     @Enumerated(EnumType.STRING)
     private DeftRepaymentStatus status;
+    private BigDecimal amountInterestRate;
 
+    @OneToMany(mappedBy = "paymentSchedule")
+    Set<LoanPenalties> loanPenaltiesSet;
 }

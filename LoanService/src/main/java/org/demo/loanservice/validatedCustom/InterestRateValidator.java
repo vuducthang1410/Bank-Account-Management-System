@@ -6,9 +6,9 @@ import org.demo.loanservice.validatedCustom.interfaceValidate.InterestRateValida
 
 import java.math.BigDecimal;
 
-public class InterestRateValidator implements ConstraintValidator<InterestRateValidation, BigDecimal> {
+public class InterestRateValidator implements ConstraintValidator<InterestRateValidation, Double> {
     @Override
-    public boolean isValid(BigDecimal value, ConstraintValidatorContext constraintValidatorContext) {
-        return value.compareTo(BigDecimal.ZERO)>=0;
+    public boolean isValid(Double value, ConstraintValidatorContext constraintValidatorContext) {
+        return value>0;
     }
 }

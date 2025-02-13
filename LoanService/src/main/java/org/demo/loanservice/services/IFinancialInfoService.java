@@ -21,5 +21,5 @@ public interface IFinancialInfoService{
     DataResponseWrapper<Object> verifyFinancialInfo(String transactionId);
 
 
-    FinancialInfo getFinancialInfoByCifCode(String id, String transactionId);
+    FinancialInfo getFinancialInfoByCustomerId(String id, String transactionId);
 }

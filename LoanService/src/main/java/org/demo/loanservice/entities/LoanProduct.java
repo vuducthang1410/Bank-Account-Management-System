@@ -21,6 +21,7 @@ import org.demo.loanservice.dto.enumDto.Unit;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,8 +57,8 @@ public class LoanProduct extends BaseEntity {
 
     @Schema(description = "The interest rate ID associated with this loan product," +
             " linking to the interest rate table.")
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "loanProduct")
-    private Set<InterestRate> interestRateSet;
+    @OneToMany(mappedBy = "loanProduct",fetch = FetchType.LAZY)
+    private Set<InterestRate> interestRateSet=new HashSet<>();
 
     @Schema(description = "Utility services associated with the loan product, " +
             "which may include insurance, financial planning services, etc.")

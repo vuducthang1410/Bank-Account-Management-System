@@ -6,11 +6,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -52,5 +54,11 @@ public class BaseEntity implements Serializable {
     private LocalDateTime lastModifiedDate;
     @Column( length = 1,name = "IS_DELETED")
     @Audited
+    @SQLRestriction("IS_DELETED = false")
     private Boolean isDeleted;
+
+    @PrePersist
+    protected void onCreate(){
+        this.isDeleted=false;
+    }
 }

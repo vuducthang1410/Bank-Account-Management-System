@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
 import org.demo.loanservice.common.MessageData;
-import org.demo.loanservice.common.MessageValue;
 import org.demo.loanservice.common.Util;
 import org.demo.loanservice.controllers.exception.DataNotFoundException;
-import org.demo.loanservice.dto.MapToDto;
+import org.demo.loanservice.dto.MapEntityToDto;
 import org.demo.loanservice.dto.enumDto.Unit;
 import org.demo.loanservice.dto.request.InterestRateRq;
 import org.demo.loanservice.dto.response.InterestRateRp;
@@ -45,7 +44,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
     public DataResponseWrapper<Object> save(InterestRateRq interestRateRq, String transactionId) {
         Optional<LoanProduct> loanProductOptional = loanProductRepository.findByIdAndIsDeleted(interestRateRq.getLoanProductId(), Boolean.FALSE);
         if (loanProductOptional.isEmpty()) {
-            log.info(MessageData.MESSAGE_LOG, MessageData.LOAN_PRODUCT_NOT_FOUNT.getMessageLog(), transactionId);
+            log.info(MessageData.MESSAGE_LOG_NOT_FOUND_DATA, transactionId, MessageData.LOAN_PRODUCT_NOT_FOUNT.getMessageLog(), interestRateRq.getLoanProductId());
             throw new DataNotFoundException(MessageData.LOAN_PRODUCT_NOT_FOUNT.getKeyMessage(), MessageData.LOAN_PRODUCT_NOT_FOUNT.getCode());
         }
         LoanProduct loanProduct = loanProductOptional.get();
@@ -61,7 +60,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
         interestRateRepository.save(interestRate);
         return DataResponseWrapper.builder()
                 .data(Map.of("InterestRateId", interestRate.getId()))
-                .message(util.getMessageFromMessageSource(MessageValue.CREATED_SUCCESSFUL))
+                .message(util.getMessageFromMessageSource(MessageData.CREATED_SUCCESSFUL.getKeyMessage()))
                 .status("00000")
                 .build();
     }
@@ -71,13 +70,13 @@ public class InterestRateServiceImpl implements IInterestRateService {
     public DataResponseWrapper<Object> getById(String id, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
         if (optionalInterestRate.isEmpty()) {
-            log.info(MessageData.MESSAGE_LOG, MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(), transactionId);
+            log.info(MessageData.MESSAGE_LOG_NOT_FOUND_DATA, transactionId, MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(), id);
             throw new DataNotFoundException(MessageData.INTEREST_RATE_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_NOT_FOUND.getCode());
         }
         return DataResponseWrapper.builder()
                 .status("00000")
-                .message(util.getMessageFromMessageSource(MessageValue.FIND_SUCCESSFULLY))
-                .data(MapToDto.convertToInterestRateRp(optionalInterestRate.get()))
+                .message(util.getMessageFromMessageSource(MessageData.FIND_SUCCESSFULLY.getKeyMessage()))
+                .data(MapEntityToDto.convertToInterestRateRp(optionalInterestRate.get()))
                 .build();
     }
 
@@ -88,12 +87,12 @@ public class InterestRateServiceImpl implements IInterestRateService {
         Map<String, Object> dataResponse = new HashMap<>();
         dataResponse.put("totalRecord", interestRatePage.getTotalElements());
         List<InterestRateRp> interestRateRpList = interestRatePage.stream().map(
-                MapToDto::convertToInterestRateRp
+                MapEntityToDto::convertToInterestRateRp
         ).toList();
         dataResponse.put("interestRateList", interestRateRpList);
         return DataResponseWrapper.builder()
                 .data(dataResponse)
-                .message(util.getMessageFromMessageSource(MessageValue.FIND_SUCCESSFULLY))
+                .message(util.getMessageFromMessageSource(MessageData.FIND_SUCCESSFULLY.getKeyMessage()))
                 .status("00000")
                 .build();
     }
@@ -108,7 +107,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
         return DataResponseWrapper.builder()
                 .status("00000")
                 .message("Active interest rate successfully")
-                .data(MapToDto.convertToInterestRateRp(interestRate))
+                .data(MapEntityToDto.convertToInterestRateRp(interestRate))
                 .build();
     }
 
@@ -125,7 +124,7 @@ public class InterestRateServiceImpl implements IInterestRateService {
         return DataResponseWrapper.builder()
                 .status("00000")
                 .message("Active interest rate successfully")
-                .data(MapToDto.convertToInterestRateRp(interestRate))
+                .data(MapEntityToDto.convertToInterestRateRp(interestRate))
                 .build();
     }
 
@@ -146,18 +145,24 @@ public class InterestRateServiceImpl implements IInterestRateService {
     public InterestRate getInterestRateById(String id, String transactionId) {
         Optional<InterestRate> optionalInterestRate = interestRateRepository.findInterestRateByIdAndIsDeleted(id, false);
         if (optionalInterestRate.isEmpty()) {
-            log.info(MessageData.MESSAGE_LOG, MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(), transactionId);
+            log.info(MessageData.MESSAGE_LOG_NOT_FOUND_DATA, transactionId, MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(), id);
             throw new DataNotFoundException(MessageData.INTEREST_RATE_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_NOT_FOUND.getCode());
         }
         return optionalInterestRate.get();
     }
+
     @Override
-    public InterestRate getInterestRateByLoanAmount(BigDecimal loanAmount, String transactionId){
-        Optional<InterestRate> optionalInterestRate=interestRateRepository.findFirstByMinimumAmountLessThanEqualOrderByMinimumAmount(loanAmount,false);
-        if(optionalInterestRate.isEmpty()){
-            log.info(MessageData.MESSAGE_LOG, MessageData.INTEREST_RATE_NOT_FOUND.getMessageLog(), transactionId);
-            throw new DataNotFoundException(MessageData.INTEREST_RATE_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_NOT_FOUND.getCode());
+    public InterestRate getInterestRateByLoanAmount(BigDecimal loanAmount, String transactionId) {
+        log.debug("transactionId: {} - Loan amount : {}", transactionId, loanAmount.toPlainString());
+        Optional<InterestRate> optionalInterestRate = interestRateRepository.findFirstByMinimumAmountLessThanEqualAndIsDeletedAndIsActiveTrueOrderByMinimumAmount(loanAmount, false);
+        if (optionalInterestRate.isEmpty()) {
+            log.info(MessageData.MESSAGE_LOG, transactionId, MessageData.INTEREST_RATE_VALID_NOT_FOUND.getMessageLog(), "Greater than ".concat(loanAmount.toPlainString()));
+            throw new DataNotFoundException(MessageData.INTEREST_RATE_VALID_NOT_FOUND.getKeyMessage(), MessageData.INTEREST_RATE_VALID_NOT_FOUND.getCode());
         }
         return optionalInterestRate.get();
+    }
+    @Override
+    public List<InterestRate> interestRateList(List<String> listLoanProduct){
+        return interestRateRepository.findValidInterestRates(listLoanProduct);
     }
 }
