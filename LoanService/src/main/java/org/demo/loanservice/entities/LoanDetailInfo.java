@@ -9,8 +9,6 @@ import org.demo.loanservice.dto.enumDto.Unit;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -29,16 +27,14 @@ public class LoanDetailInfo extends BaseEntity {
     private LoanProduct loanProductId;
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
-    private Timestamp loanDate;
     @Enumerated(EnumType.STRING)
     private LoanStatus loanStatus;
     private BigDecimal loanAmount;
     private Integer loanTerm;
     @Enumerated(EnumType.STRING)
     private Unit unit;
-    private String note;
     private Double interestRate;
-
+    private String note;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "financial_info_id")
     private FinancialInfo financialInfo;

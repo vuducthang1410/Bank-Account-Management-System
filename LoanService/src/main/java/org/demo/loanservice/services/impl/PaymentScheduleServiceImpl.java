@@ -5,21 +5,15 @@ import com.system.common_library.dto.response.account.AccountInfoDTO;
 import com.system.common_library.dto.transaction.loan.CreateLoanPaymentTransactionDTO;
 import com.system.common_library.dto.transaction.loan.TransactionLoanResultDTO;
 import com.system.common_library.enums.ObjectStatus;
-import com.system.common_library.exception.DubboException;
 import com.system.common_library.service.AccountDubboService;
 import com.system.common_library.service.TransactionDubboService;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.demo.loanservice.common.DataResponseWrapper;
-import org.demo.loanservice.common.DateUtil;
-import org.demo.loanservice.common.MessageData;
-import org.demo.loanservice.common.MessageValue;
-import org.demo.loanservice.common.Util;
+import org.demo.loanservice.common.*;
 import org.demo.loanservice.controllers.exception.DataNotFoundException;
 import org.demo.loanservice.controllers.exception.DataNotValidException;
-import org.demo.loanservice.controllers.exception.ServerErrorException;
 import org.demo.loanservice.dto.TransactionInfoDto;
 import org.demo.loanservice.dto.enumDto.DeftRepaymentStatus;
 import org.demo.loanservice.dto.enumDto.FormDeftRepaymentEnum;
@@ -48,12 +42,7 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -112,7 +101,7 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
                 paymentScheduleList.add(paymentSchedule);
             }
         }
-        paymentScheduleRepository.saveAll(paymentScheduleList);
+        paymentScheduleRepository.saveAllAndFlush(paymentScheduleList);
     }
 
     @Override
@@ -132,7 +121,8 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
             throw new DataNotValidException(MessageData.PAYMENT_SCHEDULE_COMPLETED.getKeyMessage(),
                     MessageData.PAYMENT_SCHEDULE_COMPLETED.getCode());
         }
-
+        // Initialize repayment history tracking
+        List<RepaymentHistory> repaymentHistoryList = new LinkedList<>();
         try {
             // Fetch customer banking and loan account details
             log.info("Transaction {}: Fetching banking account and loan account details.", transactionId);
@@ -160,9 +150,6 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
                         MessageData.ACCOUNT_BALANCE_NOT_ENOUGH.getCode());
             }
 
-            // Initialize repayment history tracking
-            List<RepaymentHistory> repaymentHistoryList = new LinkedList<>();
-
             // Process the payment based on the specified payment type (INTEREST, PRINCIPAL, PENALTY)
             log.info("Transaction {}: Initiating payment processing for schedule ID {}.", transactionId, deftRepaymentRq.getPaymentScheduleId());
             processPayment(deftRepaymentRq.getPaymentType(), paymentSchedule, accountBankingDTO, accountLoanInfoDTO, transactionInfoDto, repaymentHistoryList);
@@ -174,22 +161,19 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
                         MessageData.ACCOUNT_BALANCE_NOT_ENOUGH.getCode());
             }
 
-            // Persist the updated payment schedule and repayment history
-            paymentScheduleRepository.save(paymentSchedule);
-            repaymentHistoryRepository.saveAll(repaymentHistoryList);
-            log.info("Transaction {}: Payment successfully processed and saved.", transactionId);
 
+            log.info("Transaction {}: Payment successfully processed and saved.", transactionId);
+            // Persist the updated payment schedule and repayment history
+            paymentScheduleRepository.saveAndFlush(paymentSchedule);
+            repaymentHistoryRepository.saveAllAndFlush(repaymentHistoryList);
             return DataResponseWrapper.builder()
                     .status(MessageValue.STATUS_CODE_SUCCESSFULLY)
                     .data(paymentSchedule.getId())
                     .build();
-
-        } catch (DubboException dubboException) {
-            log.error("Transaction {}: Error during payment processing - {}", transactionId, dubboException.getMessage(), dubboException);
-            throw new ServerErrorException();
         } catch (Exception e) {
-            log.error("Transaction {}: Unexpected error - {}", transactionId, e.getMessage(), e);
-            throw new DataNotValidException("Unexpected error during repayment process.", "500");
+            log.error(MessageData.MESSAGE_LOG_DETAIL, transactionId, MessageData.REPAYMENT_LOAN_ERROR.getMessageLog(), e.getMessage(), e);
+            throw new DataNotValidException(MessageData.REPAYMENT_LOAN_ERROR.getKeyMessage(), MessageData.REPAYMENT_LOAN_ERROR.getKeyMessage());
+            //todo: rollback transaction
         }
     }
 
@@ -203,8 +187,8 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
             try {
                 paymentLoan(paymentSchedule, accountBankingDTO, accountLoanInfoDTO, transactionInfoDto, repaymentHistoryList);
             } catch (Exception e) {
-                log.error("Error processing interest payment: {}", e.getMessage());
-                throw e;
+                log.error("Error processing interest payment: {}", e.getMessage(), e);
+                return;
             }
         }
 
@@ -213,8 +197,8 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
             try {
                 paymentInterest(paymentSchedule, accountBankingDTO, accountLoanInfoDTO, transactionInfoDto, repaymentHistoryList);
             } catch (Exception e) {
-                log.error("Error processing principal payment: {}", e.getMessage());
-                throw e;
+                log.error("Error processing principal payment: {}", e.getMessage(), e);
+                return;
             }
         }
 
@@ -223,8 +207,7 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
             try {
                 paymentPenalty(paymentSchedule, accountBankingDTO, accountLoanInfoDTO, transactionInfoDto, repaymentHistoryList);
             } catch (Exception e) {
-                log.error("Error processing penalty payment: {}", e.getMessage());
-                throw e;
+                log.error("Error processing penalty payment: {}", e.getMessage(), e);
             }
         }
     }
@@ -277,7 +260,6 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
                                 AccountInfoDTO accountLoanInfoDTO,
                                 TransactionInfoDto transactionInfoDto,
                                 List<RepaymentHistory> repaymentHistoryList) {
-
         Set<LoanPenalties> loanPenaltiesSet = paymentSchedule.getLoanPenaltiesSet();
 
         // Calculate the total penalty amount

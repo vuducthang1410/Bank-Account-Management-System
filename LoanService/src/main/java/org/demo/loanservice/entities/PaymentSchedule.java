@@ -2,7 +2,6 @@ package org.demo.loanservice.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.commons.lang3.SerializationUtils;
 import org.demo.loanservice.dto.enumDto.DeftRepaymentStatus;
 import org.hibernate.envers.Audited;
 
@@ -22,7 +21,7 @@ public class PaymentSchedule extends BaseEntity{
     private Timestamp paymentInterestDate;
     private Timestamp paymentScheduleDate;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_loan_info_id")
+    @JoinColumn(name = "customer_loan_info_id",nullable = false)
     private LoanDetailInfo loanDetailInfo;
     private String name;
     private Timestamp dueDate;

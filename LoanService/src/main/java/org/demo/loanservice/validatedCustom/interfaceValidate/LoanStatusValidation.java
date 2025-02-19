@@ -4,11 +4,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import org.demo.loanservice.validatedCustom.LoanStatusValidator;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Target({ElementType.METHOD, ElementType.FIELD,ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)

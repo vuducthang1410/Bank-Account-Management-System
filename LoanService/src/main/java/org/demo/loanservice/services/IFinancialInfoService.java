@@ -22,4 +22,5 @@ public interface IFinancialInfoService{
 
 
     FinancialInfo getFinancialInfoByCustomerId(String id, String transactionId);
+    List<FinancialInfo> getListFinancialInfoByCustomerId(String customerId,String transactionId);
 }

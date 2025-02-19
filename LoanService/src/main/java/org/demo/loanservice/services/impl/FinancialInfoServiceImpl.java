@@ -3,6 +3,7 @@ package org.demo.loanservice.services.impl;
 import com.system.common_library.dto.response.account.AccountInfoDTO;
 import com.system.common_library.dto.user.CustomerDetailDTO;
 import com.system.common_library.enums.ObjectStatus;
+import com.system.common_library.exception.DubboException;
 import com.system.common_library.service.AccountDubboService;
 import com.system.common_library.service.CustomerDubboService;
 import lombok.RequiredArgsConstructor;
@@ -74,68 +75,71 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
                 log.info(MessageData.MESSAGE_LOG, MessageData.CUSTOMER_ACCOUNT_NOT_ACTIVE.getMessageLog(), transactionId);
                 throw new DataNotValidException(MessageData.CUSTOMER_ACCOUNT_NOT_ACTIVE.getKeyMessage(), MessageData.CUSTOMER_ACCOUNT_NOT_ACTIVE.getCode());
             }
-        } catch (Exception e) {
-            log.info(MessageData.MESSAGE_LOG, transactionId, e.getMessage());
-            throw new ServerErrorException(); // Handle server errors gracefully
-        }
 
 
 //         Check if the banking account is active
-        AccountInfoDTO bankingAccountInfoDTO = accountDubboService.getBankingAccount(cifCode);
-        if (bankingAccountInfoDTO == null) {
-            return null;
+            AccountInfoDTO bankingAccountInfoDTO = accountDubboService.getBankingAccount(cifCode);
+            if (bankingAccountInfoDTO == null) {
+                return null;
+            }
+            if (!bankingAccountInfoDTO.getStatusAccount().equals(ObjectStatus.ACTIVE)) {
+                log.info(MessageData.MESSAGE_LOG, MessageData.BANKING_ACCOUNT_NOT_ACTIVE.getMessageLog(), transactionId);
+                throw new DataNotValidException(MessageData.BANKING_ACCOUNT_NOT_ACTIVE.getKeyMessage(), MessageData.BANKING_ACCOUNT_NOT_ACTIVE.getCode());
+            }
+
+            // Fetch credit score from CIC service (To-Do: Update input parameters dynamically)
+            CICResponse cicResponse = cicService.getCreditScore("079123456789", "vu duc thang", "", "0123456789");
+
+            // Create and save financial information record
+            FinancialInfo financialInfo = new FinancialInfo();
+            financialInfo.setCustomerId(customerInfo.getCustomerId());
+            financialInfo.setCustomerNumber(customerInfo.getCustomerNumber());
+            financialInfo.setIncome(financialInfoRq.getIncome().stripTrailingZeros().toPlainString());
+            financialInfo.setUnit(Unit.valueOf(financialInfoRq.getUnit()));
+            financialInfo.setIncomeSource(financialInfoRq.getIncomeSource());
+            financialInfo.setIncomeType(financialInfoRq.getIncomeType());
+            financialInfo.setRequestStatus(RequestStatus.PENDING);
+            financialInfo.setCreditScore(cicResponse.getCreditScore());
+            financialInfo.setDebtStatus(cicResponse.getDebtStatus());
+            financialInfo.setIsExpired(false);
+            financialInfo.setExpiredDate(new Date(DateUtil.getDateOfAfterNMonth(6).getTime())); // Set expiry date to 6 months later
+            financialInfo.setIsDeleted(false);
+            financialInfo.setLastUpdatedCreditReview(DateUtil.convertStringToTimeStamp(cicResponse.getLastUpdated()));
+            financialInfo.setApplicableObjects(ApplicableObjects.INDIVIDUAL_CUSTOMER);
+            financialInfo.setLoanAmountMax(BigDecimal.ZERO);
+            financialInfoRepository.save(financialInfo);
+
+            // Process income verification documents
+            List<LegalDocuments> legalDocumentsList = new ArrayList<>();
+            incomeVerificationDocuments.forEach(multipartFile -> {
+                LegalDocuments legalDocument = new LegalDocuments();
+                legalDocument.setCifCode("123456789"); // ToDo: Retrieve CIF code dynamically from account service
+                legalDocument.setDescription("Financial information document");
+                legalDocument.setIsDeleted(false);
+                legalDocument.setExpirationDate(new Date(DateUtil.getDateOfAfterNMonth(3).getTime())); // Expiry date: 3 months later
+                legalDocument.setDocumentType(DocumentType.LOAN_DOCUMENT);
+                legalDocument.setUrlDocument(multipartFile.getOriginalFilename()); // ToDo: Upload file to S3 and get URL
+                legalDocument.setRequestStatus(RequestStatus.APPROVED);
+                legalDocumentsList.add(legalDocument);
+            });
+            legalDocumentsRepository.saveAll(legalDocumentsList);
+
+            // Associate legal documents with financial information
+            legalDocumentsList.forEach(legalDocument -> legalDocumentsRepository.insertFinancialInfoDocument(financialInfo.getId(), legalDocument.getId()));
+
+            // Return response
+            return DataResponseWrapper.builder()
+                    .data(financialInfo.getId())
+                    .status(MessageValue.STATUS_CODE_SUCCESSFULLY)
+                    .message("Your financial information has been successfully registered and is pending review!") // To-Do: Handle response message dynamically
+                    .build();
+        } catch (DubboException e) {
+            log.info(MessageData.MESSAGE_LOG, transactionId, e.getMessage());
+            throw e; // Handle server errors gracefully
+        } catch (Exception e) {
+            log.error(MessageData.MESSAGE_LOG, transactionId, e.getMessage());
+            throw new ServerErrorException();
         }
-        if (!bankingAccountInfoDTO.getStatusAccount().equals(ObjectStatus.ACTIVE)) {
-            log.info(MessageData.MESSAGE_LOG, MessageData.BANKING_ACCOUNT_NOT_ACTIVE.getMessageLog(), transactionId);
-            throw new DataNotValidException(MessageData.BANKING_ACCOUNT_NOT_ACTIVE.getKeyMessage(), MessageData.BANKING_ACCOUNT_NOT_ACTIVE.getCode());
-        }
-
-        // Fetch credit score from CIC service (To-Do: Update input parameters dynamically)
-        CICResponse cicResponse = cicService.getCreditScore("079123456789", "vu duc thang", "", "0123456789");
-
-        // Create and save financial information record
-        FinancialInfo financialInfo = new FinancialInfo();
-        financialInfo.setCustomerId(customerInfo.getCustomerId());
-        financialInfo.setCustomerNumber(customerInfo.getCustomerNumber());
-        financialInfo.setIncome(financialInfoRq.getIncome().stripTrailingZeros().toPlainString());
-        financialInfo.setUnit(Unit.valueOf(financialInfoRq.getUnit()));
-        financialInfo.setIncomeSource(financialInfoRq.getIncomeSource());
-        financialInfo.setIncomeType(financialInfoRq.getIncomeType());
-        financialInfo.setRequestStatus(RequestStatus.PENDING);
-        financialInfo.setCreditScore(cicResponse.getCreditScore());
-        financialInfo.setDebtStatus(cicResponse.getDebtStatus());
-        financialInfo.setIsExpired(false);
-        financialInfo.setExpiredDate(new Date(DateUtil.getDateOfAfterNMonth(6).getTime())); // Set expiry date to 6 months later
-        financialInfo.setIsDeleted(false);
-        financialInfo.setLastUpdatedCreditReview(DateUtil.convertStringToTimeStamp(cicResponse.getLastUpdated()));
-        financialInfo.setApplicableObjects(ApplicableObjects.INDIVIDUAL_CUSTOMER);
-        financialInfo.setLoanAmountMax(BigDecimal.ZERO);
-        financialInfoRepository.save(financialInfo);
-
-        // Process income verification documents
-        List<LegalDocuments> legalDocumentsList = new ArrayList<>();
-        incomeVerificationDocuments.forEach(multipartFile -> {
-            LegalDocuments legalDocument = new LegalDocuments();
-            legalDocument.setCifCode("123456789"); // ToDo: Retrieve CIF code dynamically from account service
-            legalDocument.setDescription("Financial information document");
-            legalDocument.setIsDeleted(false);
-            legalDocument.setExpirationDate(new Date(DateUtil.getDateOfAfterNMonth(3).getTime())); // Expiry date: 3 months later
-            legalDocument.setDocumentType(DocumentType.LOAN_DOCUMENT);
-            legalDocument.setUrlDocument(multipartFile.getOriginalFilename()); // ToDo: Upload file to S3 and get URL
-            legalDocument.setRequestStatus(RequestStatus.APPROVED);
-            legalDocumentsList.add(legalDocument);
-        });
-        legalDocumentsRepository.saveAll(legalDocumentsList);
-
-        // Associate legal documents with financial information
-        legalDocumentsList.forEach(legalDocument -> legalDocumentsRepository.insertFinancialInfoDocument(financialInfo.getId(), legalDocument.getId()));
-
-        // Return response
-        return DataResponseWrapper.builder()
-                .data(financialInfo.getId())
-                .status(MessageValue.STATUS_CODE_SUCCESSFULLY)
-                .message("Your financial information has been successfully registered and is pending review!") // To-Do: Handle response message dynamically
-                .build();
     }
 
 
@@ -207,16 +211,21 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
     public DataResponseWrapper<Object> verifyFinancialInfo(String transactionId) {
         //todo: get customer id form Security Context
         String customerId = "123456789";
-        Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIsDeletedAndCustomerId(false, customerId);
+        Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIsDeletedAndCustomerIdAndIsExpiredFalse(false, customerId);
         if (financialInfoOptional.isEmpty()) {
             log.info(MessageData.MESSAGE_LOG, transactionId, "Not found financial info of customer to verify");
             throw new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());
         }
-        Boolean isApprove = financialInfoOptional.get().getRequestStatus().equals(RequestStatus.APPROVED);
+        // Validate if the financial information is approved
+        if (!financialInfoOptional.get().getRequestStatus().equals(RequestStatus.APPROVED)) {
+            log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_APPROVE.getMessageLog(), transactionId);
+            throw new DataNotValidException(MessageData.FINANCIAL_INFO_NOT_APPROVE.getKeyMessage(),
+                    MessageData.FINANCIAL_INFO_NOT_APPROVE.getCode());
+        }
         return DataResponseWrapper.builder()
                 .status(MessageValue.STATUS_CODE_SUCCESSFULLY)
                 .message("")
-                .data(isApprove)
+                .data(convertToFinancialInfoRp(financialInfoOptional.get(), false))
                 .build();
     }
 
@@ -250,11 +259,17 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
 
     @Override
     public FinancialInfo getFinancialInfoByCustomerId(String customerId, String transactionId) {
-        return financialInfoRepository.findByIsDeletedAndCustomerId(false, customerId)
+        return financialInfoRepository.findByIsDeletedAndCustomerIdAndIsExpiredFalse(false, customerId)
                 .orElseThrow(() -> {
                     log.info(MessageData.MESSAGE_LOG_NOT_FOUND_DATA, transactionId, "Not found financial info with customer ", customerId);
                     return new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());
                 });
+    }
+
+    @Override
+    public List<FinancialInfo> getListFinancialInfoByCustomerId(String customerId, String transactionId) {
+        log.debug("TransactionId: {} - customer id - {} ", transactionId, customerId);
+        return financialInfoRepository.findAllByIsDeletedFalseAndCustomerId(customerId);
     }
 
     private LegalDocumentRp convertToLegalDocumentRp(LegalDocuments legalDocuments) {

@@ -9,4 +9,6 @@ public interface ILoanDetailInfoService{
     DataResponseWrapper<Object> approveIndividualCustomerDisbursement(LoanInfoApprovalRq loanInfoApprovalRq, String transactionId);
 
     DataResponseWrapper<Object> getAllByLoanStatus(String loanStatus, Integer pageNumber, Integer pageSize, String transactionId);
+
+    DataResponseWrapper<Object> getAllByCustomerId(Integer pageNumber, Integer pageSize, String transactionId);
 }

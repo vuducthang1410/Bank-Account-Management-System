@@ -1,5 +1,6 @@
 package org.demo.loanservice.controllers.exception;
 
+import com.system.common_library.exception.DubboException;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -121,6 +122,20 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DataNotValidWithConditionException.class)
+    public ResponseEntity<DataResponseWrapper<Object>> handlerDataNotValidWithConditionException(
+            DataNotValidWithConditionException ex) {
+        String messageResponse = util.getMessageTransactionFromMessageSource(ex.getMessageKey(), ex.getCondition());
+        // Log the data validation error
+        logger.error(messageResponse);
+
+        // Return response for invalid data
+        return createdResponse(messageResponse,
+                util.getMessageFromMessageSource(MessageData.INVALID_DATA.getKeyMessage()),
+                ex.getCode(),
+                HttpStatus.BAD_REQUEST);
+    }
+
     /**
      * Handles server errors in the application.
      */
@@ -133,9 +148,8 @@ public class GlobalExceptionHandler {
 
         // Return response for server error
         return createdResponse(util.getMessageFromMessageSource(MessageData.SERVER_ERROR.getKeyMessage()),
-                MessageData.SERVER_ERROR.getMessageLog(),
-                MessageData.SERVER_ERROR.getCode(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+                MessageData.SERVER_ERROR.getCode()
+        );
     }
 
     /**
@@ -147,10 +161,8 @@ public class GlobalExceptionHandler {
 
         // Log the validation method error
         logger.error("Method validation error: {}", ex.getMessage());
-
         // Collect validation error messages
         Set<String> errors = ex.getAllErrors().stream().map(MessageSourceResolvable::getDefaultMessage).collect(Collectors.toSet());
-
         // Return response with validation error messages
         return createdResponse(errors, util.getMessageFromMessageSource(MessageData.INVALID_DATA.getKeyMessage()), "40000", HttpStatus.BAD_REQUEST);
     }
@@ -160,24 +172,35 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<DataResponseWrapper<Object>> handlerException(Exception ex) {
-
         // Log the general exception
         logger.error("Unexpected error: {}", ex.getMessage(), ex);
-
         // Return response for unexpected error
-        return createdResponse(MessageData.SERVER_ERROR.getMessageLog(),
-                util.getMessageFromMessageSource(MessageData.SERVER_ERROR.getKeyMessage()),
-                MessageValue.STATUS_CODE_SERVER_ERROR,
-                HttpStatus.INTERNAL_SERVER_ERROR);
+        return createdResponse(util.getMessageFromMessageSource(MessageData.SERVER_ERROR.getKeyMessage()),
+                MessageValue.STATUS_CODE_SERVER_ERROR
+        );
+    }
+
+    @ExceptionHandler(DubboException.class)
+    public ResponseEntity<DataResponseWrapper<Object>> handlerDubboException(DubboException ex) {
+        // Log the general exception
+        logger.error("Dubbo error: {}", ex.getMessage(), ex);
+        // Return response for unexpected error
+        return createdResponse(util.getMessageFromMessageSource(MessageData.SERVER_ERROR.getKeyMessage()),
+                MessageValue.DUBBO_SERVICE_ERROR
+        );
     }
 
     /**
-     * @param body The body of the response, can be an error message or data.
-     * @param message The message for the response.
-     * @param status The status code for the response.
+     * @param body       The body of the response, can be an error message or data.
+     * @param message    The message for the response.
+     * @param status     The status code for the response.
      * @param httpStatus The HTTP status code.
      */
     private ResponseEntity<DataResponseWrapper<Object>> createdResponse(Object body, String message, String status, HttpStatus httpStatus) {
         return new ResponseEntity<>(new DataResponseWrapper<>(body, message, status), httpStatus);
+    }
+
+    private ResponseEntity<DataResponseWrapper<Object>> createdResponse(String message, String status) {
+        return new ResponseEntity<>(new DataResponseWrapper<>(null, message, status), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

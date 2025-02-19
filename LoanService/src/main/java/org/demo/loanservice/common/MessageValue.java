@@ -10,7 +10,7 @@ public class MessageValue {
     public static final String STATUS_CODE_SUCCESSFULLY = "00000";
     public static final String STATUS_CODE_BAD_REQUEST="40000";
     public static final String STATUS_CODE_SERVER_ERROR="50000";
-
+    public static final String DUBBO_SERVICE_ERROR="50001";
     // Transaction content keys
     public static final String CONTENT_TRANSACTION_PRINCIPAL = "content.transaction.principal";
     public static final String CONTENT_TRANSACTION_INTEREST = "content.transaction.interest";

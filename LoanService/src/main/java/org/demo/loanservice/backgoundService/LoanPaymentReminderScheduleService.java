@@ -86,8 +86,8 @@ public class LoanPaymentReminderScheduleService {
 
         log.info("Notifying {} user(s) about upcoming due payments.", upcomingPayments.size());
         upcomingPayments.forEach(paymentSchedule -> {
-            log.debug("Loan ID: {}, Due Date: {}", paymentSchedule.getLoanDetailInfo().getLoanAccountId(), paymentSchedule.getDueDate());
-            CreateLoanTransactionDTO loanTransactionDTO=new CreateLoanTransactionDTO();
+            log.debug("Loan ID: {}, Due Date: {}", paymentSchedule.getLoanDetailInfo().getDisbursementInfoHistory().getLoanAccountId(), paymentSchedule.getDueDate());
+            CreateLoanTransactionDTO loanTransactionDTO = new CreateLoanTransactionDTO();
             transactionDubboService.createLoanTransaction(loanTransactionDTO);
         });
 
@@ -126,12 +126,12 @@ public class LoanPaymentReminderScheduleService {
             penalty.setFinedAmount(fineAmount);
             penaltiesList.add(penalty);
 
-            AccountInfoDTO accountLoanInfoDTO=accountDubboService.getLoanAccountDTO(paymentSchedule.getLoanDetailInfo().getLoanAccountId());
-            CreateLoanTransactionDTO loanTransactionDTO=new CreateLoanTransactionDTO();
+            AccountInfoDTO accountLoanInfoDTO = accountDubboService.getLoanAccountDTO(paymentSchedule.getLoanDetailInfo().getDisbursementInfoHistory().getLoanAccountId());
+            CreateLoanTransactionDTO loanTransactionDTO = new CreateLoanTransactionDTO();
             transactionDubboService.createLoanTransaction(loanTransactionDTO);
 
             log.debug("Penalty applied: Loan ID: {},Amount:{},Interest rate: {}, Fine Amount: {}",
-                    paymentSchedule.getLoanDetailInfo().getLoanAccountId(),
+                    paymentSchedule.getLoanDetailInfo().getDisbursementInfoHistory().getLoanAccountId(),
                     paymentSchedule.getAmountRepayment(),
                     paymentSchedule.getLoanDetailInfo().getInterestRate(),
                     fineAmount);

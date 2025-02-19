@@ -8,7 +8,6 @@ import org.demo.loanservice.dto.request.IndividualCustomerInfoRq;
 import org.demo.loanservice.dto.request.LoanInfoApprovalRq;
 import org.demo.loanservice.services.ILoanDetailInfoService;
 import org.demo.loanservice.validatedCustom.interfaceValidate.LoanStatusValidation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +49,21 @@ public class LoanDetailInfoController {
             @Schema(description = "Page size for pagination", example = "12")
             Integer pageSize
     ) {
-        return ResponseEntity.ok(loanDetailInfoService.getAllByLoanStatus(loanStatus,pageNumber,pageSize,transactionId));
+        return ResponseEntity.ok(loanDetailInfoService.getAllByLoanStatus(loanStatus, pageNumber, pageSize, transactionId));
     }
+
+    @GetMapping("/get-all-loan-info-by-customer-id")
+    public ResponseEntity<DataResponseWrapper<Object>> getAllLoanInfoByCustomerId(
+            @RequestHeader(name = "transactionId") String transactionId,
+            @RequestParam(name = "pageNumber", defaultValue = "0", required = false)
+            @Schema(description = "Page number for pagination", example = "0")
+            Integer pageNumber,
+
+            @RequestParam(name = "pageSize", defaultValue = "12", required = false)
+            @Schema(description = "Page size for pagination", example = "12")
+            Integer pageSize
+    ) {
+        return ResponseEntity.ok(loanDetailInfoService.getAllByCustomerId(pageNumber, pageSize, transactionId));
+    }
+
 }

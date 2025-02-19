@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface LoanDetailInfoRepository extends JpaRepository<LoanDetailInfo, String> {
@@ -26,4 +27,5 @@ public interface LoanDetailInfoRepository extends JpaRepository<LoanDetailInfo, 
     Optional<LoanAmountInfoProjection> getMaxLoanLimitAndCurrentLoanAmount(String customerId);
 
     Page<LoanDetailInfo> findAllByIsDeletedFalseAndLoanStatus(LoanStatus loanStatus, Pageable pageable);
+    Page<LoanDetailInfo> findAllByIsDeletedFalseAndFinancialInfo_IdIn(List<String> financialInfoIdList, Pageable pageable);
 }

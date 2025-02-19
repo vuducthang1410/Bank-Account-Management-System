@@ -2,20 +2,13 @@ package org.demo.loanservice.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.BitSet;
-import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -29,8 +22,6 @@ public class DisbursementInfoHistory extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "loan_detail_info_id")
     private LoanDetailInfo loanDetailInfo;
-    @OneToMany(mappedBy = "loanDetailInfo")
-    private Set<PaymentSchedule> paymentScheduleSet;
     // todo: Persist financial information
     private Integer creditScore;
     private String income;
@@ -40,4 +31,6 @@ public class DisbursementInfoHistory extends BaseEntity {
     private Timestamp lastUpdatedCreditReview;
     private BigDecimal amountDisbursement;
     private String loanAccountId;
+    private Timestamp loanDate;
+    private Timestamp douDate;
 }

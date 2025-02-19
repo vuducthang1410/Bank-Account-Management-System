@@ -6,7 +6,7 @@ import lombok.Getter;
 public class DataNotValidException extends RuntimeException {
     private final String messageKey;
     private final String code;
-    public DataNotValidException(String messageKey,String code){
+    public DataNotValidException(String messageKey, String code) {
         super();
         this.messageKey = messageKey;
         this.code = code;
