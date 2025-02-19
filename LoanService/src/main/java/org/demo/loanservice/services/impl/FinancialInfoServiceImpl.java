@@ -59,13 +59,11 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
     @Override
     @Transactional
     public DataResponseWrapper<Object> saveInfoIndividualCustomer(FinancialInfoRq financialInfoRq, List<MultipartFile> incomeVerificationDocuments, String transactionId) {
-        String cifCode = "00000"; // Default CIF code
         CustomerDetailDTO customerInfo;
-
         // Fetch customer information by CIF code
         try {
             //Validate customer information
-            customerInfo = customerDubboService.getCustomerByCifCode(cifCode);
+            customerInfo = customerDubboService.getCustomerByCifCode(financialInfoRq.getCifCode());
             if (customerInfo == null) {
                 log.info(MessageData.MESSAGE_LOG, transactionId, MessageData.CUSTOMER_ACCOUNT_NOT_FOUND.getMessageLog());
                 throw new DataNotFoundException(MessageData.CUSTOMER_ACCOUNT_NOT_FOUND.getKeyMessage(), MessageData.CUSTOMER_ACCOUNT_NOT_FOUND.getCode());
@@ -78,9 +76,11 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
 
 
 //         Check if the banking account is active
-            AccountInfoDTO bankingAccountInfoDTO = accountDubboService.getBankingAccount(cifCode);
+            AccountInfoDTO bankingAccountInfoDTO = accountDubboService.getBankingAccount(financialInfoRq.getCifCode());
             if (bankingAccountInfoDTO == null) {
-                return null;
+                log.error("transactionId : {} :: Execute error while get banking account. cif code: {}", transactionId, financialInfoRq.getCifCode());
+                throw new DataNotValidException(MessageData.BANKING_ACCOUNT_NOT_EXITS.getKeyMessage(),
+                        MessageData.BANKING_ACCOUNT_NOT_EXITS.getCode());
             }
             if (!bankingAccountInfoDTO.getStatusAccount().equals(ObjectStatus.ACTIVE)) {
                 log.info(MessageData.MESSAGE_LOG, MessageData.BANKING_ACCOUNT_NOT_ACTIVE.getMessageLog(), transactionId);
@@ -107,13 +107,14 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
             financialInfo.setLastUpdatedCreditReview(DateUtil.convertStringToTimeStamp(cicResponse.getLastUpdated()));
             financialInfo.setApplicableObjects(ApplicableObjects.INDIVIDUAL_CUSTOMER);
             financialInfo.setLoanAmountMax(BigDecimal.ZERO);
+            financialInfo.setCifCode(customerInfo.getCifCode());
             financialInfoRepository.save(financialInfo);
 
             // Process income verification documents
             List<LegalDocuments> legalDocumentsList = new ArrayList<>();
             incomeVerificationDocuments.forEach(multipartFile -> {
                 LegalDocuments legalDocument = new LegalDocuments();
-                legalDocument.setCifCode("123456789"); // ToDo: Retrieve CIF code dynamically from account service
+                legalDocument.setCifCode(financialInfoRq.getCifCode());
                 legalDocument.setDescription("Financial information document");
                 legalDocument.setIsDeleted(false);
                 legalDocument.setExpirationDate(new Date(DateUtil.getDateOfAfterNMonth(3).getTime())); // Expiry date: 3 months later
@@ -208,9 +209,7 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
     }
 
     @Override
-    public DataResponseWrapper<Object> verifyFinancialInfo(String transactionId) {
-        //todo: get customer id form Security Context
-        String customerId = "123456789";
+    public DataResponseWrapper<Object> verifyFinancialInfo(String transactionId, String customerId) {
         Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIsDeletedAndCustomerIdAndIsExpiredFalse(false, customerId);
         if (financialInfoOptional.isEmpty()) {
             log.info(MessageData.MESSAGE_LOG, transactionId, "Not found financial info of customer to verify");

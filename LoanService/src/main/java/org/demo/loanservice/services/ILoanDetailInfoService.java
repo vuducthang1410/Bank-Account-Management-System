@@ -10,5 +10,5 @@ public interface ILoanDetailInfoService{
 
     DataResponseWrapper<Object> getAllByLoanStatus(String loanStatus, Integer pageNumber, Integer pageSize, String transactionId);
 
-    DataResponseWrapper<Object> getAllByCustomerId(Integer pageNumber, Integer pageSize, String transactionId);
+    DataResponseWrapper<Object> getAllByCustomerId(Integer pageNumber, Integer pageSize, String transactionId, String customerId);
 }

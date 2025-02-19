@@ -138,8 +138,9 @@ public class FinancialInfoController {
     public ResponseEntity<DataResponseWrapper<Object>> verifyFinancialInfo(
             @RequestHeader(name = "transactionId")
             @Parameter(description = "Unique transaction ID")
-            String transactionId
+            String transactionId,
+            @RequestParam(name = "customerId") String customerId
     ) {
-        return ResponseEntity.ok(financialInfoService.verifyFinancialInfo(transactionId));
+        return ResponseEntity.ok(financialInfoService.verifyFinancialInfo(transactionId, customerId));
     }
 }

@@ -177,6 +177,29 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
         }
     }
 
+    @Override
+    public DataResponseWrapper<Object> getListPaymentScheduleByLoanDetailInfo(String loanInfoId, Integer pageSize, Integer pageNumber, String transactionId) {
+        LoanDetailInfo loanDetailInfo = loanDetailRepaymentScheduleService.getLoanDetailInfoById(loanInfoId, transactionId);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<RepaymentScheduleProjection> repaymentScheduleProjectionPage =
+                paymentScheduleRepository.findPaymentScheduleByLoanDetailInfoId(loanDetailInfo.getId(), pageable);
+
+        List<PaymentScheduleRp> paymentScheduleRpList = repaymentScheduleProjectionPage
+                .getContent()
+                .stream()
+                .map(this::mapToPaymentScheduleRp)
+                .toList();
+
+        Map<String, Object> dataResponse = new HashMap<>();
+        dataResponse.put("totalRecord", repaymentScheduleProjectionPage.getTotalElements());
+        dataResponse.put("listPaymentSchedule", paymentScheduleRpList);
+        return DataResponseWrapper.builder()
+                .data(dataResponse)
+                .status(MessageValue.STATUS_CODE_SUCCESSFULLY)
+                .message(util.getMessageFromMessageSource(MessageData.FIND_SUCCESSFULLY.getKeyMessage()))
+                .build();
+    }
+
     /**
      * Process the payment based on the type (INTEREST, PRINCIPAL, PENALTY, ALL).
      */
@@ -283,28 +306,7 @@ public class PaymentScheduleServiceImpl implements IPaymentScheduleService {
         createRepaymentHistory(repaymentHistoryList, transactionLoanResultDTO, totalFineAmount, "", PaymentType.PENALTY, paymentSchedule);
     }
 
-    @Override
-    public DataResponseWrapper<Object> getListPaymentScheduleByLoanDetailInfo(String loanInfoId, Integer pageSize, Integer pageNumber, String transactionId) {
-        LoanDetailInfo loanDetailInfo = loanDetailRepaymentScheduleService.getLoanDetailInfoById(loanInfoId, transactionId);
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<RepaymentScheduleProjection> repaymentScheduleProjectionPage =
-                paymentScheduleRepository.findPaymentScheduleByLoanDetailInfoId(loanDetailInfo.getId(), pageable);
 
-        List<PaymentScheduleRp> paymentScheduleRpList = repaymentScheduleProjectionPage
-                .getContent()
-                .stream()
-                .map(this::mapToPaymentScheduleRp)
-                .toList();
-
-        Map<String, Object> dataResponse = new HashMap<>();
-        dataResponse.put("totalRecord", repaymentScheduleProjectionPage.getTotalElements());
-        dataResponse.put("listPaymentSchedule", paymentScheduleRpList);
-        return DataResponseWrapper.builder()
-                .data(dataResponse)
-                .status(MessageValue.STATUS_CODE_SUCCESSFULLY)
-                .message(util.getMessageFromMessageSource(MessageData.FIND_SUCCESSFULLY.getKeyMessage()))
-                .build();
-    }
 
     private PaymentSchedule createPaymentSchedule(LoanDetailInfo loanDetailInfo, BigDecimal amountRepaymentEveryTerm, BigDecimal amountInterestRate, int index) {
         PaymentSchedule paymentSchedule = new PaymentSchedule();

@@ -74,9 +74,7 @@ public class LoanDetailInfoServiceImpl implements ILoanDetailInfoService {
     @Override
     public DataResponseWrapper<Object> registerIndividualCustomerLoan(IndividualCustomerInfoRq individualCustomerInfoRq, String transactionId) {
         // Retrieve the CIF code of the authenticated customer
-        //todo: get cif code from token
-        String cifCode = "00000"; // Default CIF code
-        CustomerDetailDTO customerInfo = customerDubboService.getCustomerByCifCode(cifCode);
+        CustomerDetailDTO customerInfo = customerDubboService.getCustomerByCifCode(individualCustomerInfoRq.getCifCode());
         // Retrieve financial information for the customer
         FinancialInfo financialInfo = financialInfoService.getFinancialInfoByCustomerId(customerInfo.getCustomerId(), transactionId);
 
@@ -300,8 +298,7 @@ public class LoanDetailInfoServiceImpl implements ILoanDetailInfoService {
     }
 
     @Override
-    public DataResponseWrapper<Object> getAllByCustomerId(Integer pageNumber, Integer pageSize, String transactionId) {
-        String customerId = "00000";//todo
+    public DataResponseWrapper<Object> getAllByCustomerId(Integer pageNumber, Integer pageSize, String transactionId, String customerId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdDate").descending());
         List<FinancialInfo> financialInfoList = financialInfoService.getListFinancialInfoByCustomerId(customerId, transactionId);
         log.debug("Size of financial info list : {}", financialInfoList.size());

@@ -61,9 +61,10 @@ public class LoanDetailInfoController {
 
             @RequestParam(name = "pageSize", defaultValue = "12", required = false)
             @Schema(description = "Page size for pagination", example = "12")
-            Integer pageSize
+            Integer pageSize,
+            @RequestParam(name = "customerId") String customerId
     ) {
-        return ResponseEntity.ok(loanDetailInfoService.getAllByCustomerId(pageNumber, pageSize, transactionId));
+        return ResponseEntity.ok(loanDetailInfoService.getAllByCustomerId(pageNumber, pageSize, transactionId, customerId));
     }
 
 }

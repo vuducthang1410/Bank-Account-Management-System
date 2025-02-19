@@ -18,8 +18,8 @@ public interface IFinancialInfoService{
 
     DataResponseWrapper<Object> approveFinancialInfo(ApproveFinancialInfoRq financialInfoRq, String transactionId);
 
-    DataResponseWrapper<Object> verifyFinancialInfo(String transactionId);
 
+    DataResponseWrapper<Object> verifyFinancialInfo(String transactionId, String customerId);
 
     FinancialInfo getFinancialInfoByCustomerId(String id, String transactionId);
     List<FinancialInfo> getListFinancialInfoByCustomerId(String customerId,String transactionId);

@@ -17,4 +17,5 @@ public class FinancialInfoRq {
     private String incomeSource;
     @NotBlank
     private String incomeType;
+    private String cifCode;
 }

@@ -13,4 +13,5 @@ public class IndividualCustomerInfoRq {
     private Integer loanTerm;
     @UnitValidation
     private String loanUnit;
+    private String cifCode;
 }
