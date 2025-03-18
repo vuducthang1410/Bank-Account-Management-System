@@ -186,6 +186,8 @@ public class LoanProductServiceImpl implements ILoanProductService {
                     .map(MapEntityToDto::convertToInterestRateRp)
                     .toList();
             loanProductRp.setInterestRate(interestRateRpList);
+        }else {
+            loanProductRp.setInterestRate(List.of());
         }
         loanProductRp.setTermLimit(loanProduct.getTermLimit());
         if (loanProduct.getUtilities() != null) {

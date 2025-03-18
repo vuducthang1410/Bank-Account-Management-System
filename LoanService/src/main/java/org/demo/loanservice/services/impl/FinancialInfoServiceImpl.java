@@ -1,6 +1,6 @@
 package org.demo.loanservice.services.impl;
 
-import com.system.common_library.dto.response.CustomerInfoRp;
+//import com.system.common_library.dto.response.CustomerInfoRp;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,7 +60,7 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
     @Transactional
     public DataResponseWrapper<Object> saveInfoIndividualCustomer(FinancialInfoRq financialInfoRq, List<MultipartFile> incomeVerificationDocuments, String transactionId) {
         String cifCode = "00000"; // Default CIF code
-        ResponseEntity<CustomerInfoRp> customerInfoResponse;
+//        ResponseEntity<CustomerInfoRp> customerInfoResponse;
 
         // Fetch customer information by CIF code
 //        try {
@@ -200,7 +200,7 @@ public class FinancialInfoServiceImpl implements IFinancialInfoService {
         String customerId = "123456789";
         Optional<FinancialInfo> financialInfoOptional = financialInfoRepository.findByIsDeletedAndCustomerId(false, customerId);
         if (financialInfoOptional.isEmpty()) {
-            log.info(MessageData.MESSAGE_LOG, transactionId, "Not found financial info of customer to verify");
+            log.info(MessageData.MESSAGE_LOG, transactionId, "Not found financial info of customer to verify","");
             throw new DataNotFoundException(MessageData.FINANCIAL_INFO_NOT_FOUND.getKeyMessage(), MessageData.FINANCIAL_INFO_NOT_FOUND.getCode());
         }
         Boolean isApprove = financialInfoOptional.get().getRequestStatus().equals(RequestStatus.APPROVED);

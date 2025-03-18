@@ -11,17 +11,19 @@
         <module name="ConfigServer" />
         <module name="ApiGetwayService" />
       </profile>
-      <profile name="Annotation profile for TransactionService" enabled="true">
+      <profile name="Annotation profile for NapasService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
-        <module name="NotificationService" />
         <module name="FileService" />
         <module name="TransactionService" />
+        <module name="CoreBankingService" />
+        <module name="NotificationService" />
         <module name="ReportingService" />
+        <module name="NapasService" />
         <module name="AccountService" />
         <module name="CustomerSerivce" />
       </profile>
@@ -32,9 +34,11 @@
       <module name="AccountService" options="-parameters" />
       <module name="ApiGetwayService" options="-parameters" />
       <module name="ConfigServer" options="-parameters" />
+      <module name="CoreBankingService" options="-parameters" />
       <module name="CustomerSerivce" options="-parameters" />
       <module name="FileService" options="-parameters" />
       <module name="LoanService" options="-parameters" />
+      <module name="NapasService" options="-parameters" />
       <module name="NotificationService" options="-parameters" />
       <module name="ReportingService" options="-parameters" />
       <module name="TransactionService" options="-parameters" />

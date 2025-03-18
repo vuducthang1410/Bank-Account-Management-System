@@ -62,9 +62,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataNotValidException.class)
-    public ResponseEntity<DataResponseWrapper<Object>> handlerInDataNotFoundException(DataNotValidException ex) {
+    public ResponseEntity<DataResponseWrapper<Object>> handlerInDataNotValidException(DataNotValidException ex) {
         return createdResponse(util.getMessageFromMessageSource(ex.getMessageKey()),
-                util.getMessageFromMessageSource(MessageData.DATA_NOT_FOUND.getKeyMessage()),
+                util.getMessageFromMessageSource(MessageData.INVALID_DATA.getKeyMessage()),
                 ex.getCode(),
                 HttpStatus.BAD_REQUEST);
     }

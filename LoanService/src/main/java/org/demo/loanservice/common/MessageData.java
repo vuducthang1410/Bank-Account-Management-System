@@ -22,8 +22,8 @@ public enum MessageData {
 
 
     FINANCIAL_INFO_NOT_APPROVE("financial_info.not_approve", "Financial info not approve", "30301"),
-    LOAN_AMOUNT_LARGER_LOAN_LIMIT("loan_amount.larger.loan_limit", "Loan amount larger than loan amount limit: loan amount limit= {}", "30302"),
-    LOAN_TERM_LARGER_THAN_LIMIT("loan_term.larger.loan_term_limit", "Loan term larger than loan term limit: loan term limit= {}", "30303"),
+    LOAN_AMOUNT_LARGER_LOAN_LIMIT("loan_amount.larger.loan_limit", "Loan amount larger than loan amount limit", "30302"),
+    LOAN_TERM_LARGER_THAN_LIMIT("loan_term.larger.loan_term_limit", "Loan term larger than loan term limit", "30303"),
     CUSTOMER_ACCOUNT_NOT_ACTIVE("customer_account.not_active", "Customer account is not active", "30304"),
     BANKING_ACCOUNT_NOT_ACTIVE("banking_account.not_active", "Banking account is not active", "30305"),
     CREATED_LOAN_ACCOUNT_ERROR("created.loan_account.error", "Created loan account is error", "30306"),
@@ -34,14 +34,14 @@ public enum MessageData {
     FINANCIAL_INFO_NOT_FOUND("financial_info.not_found", "Financial info not found", "40404"),
     LOAN_DETAIL_INFO_NOT_FOUND("loan_detail_info.not_found", "Loan detail info not found", "40405"),
     CUSTOMER_ACCOUNT_NOT_FOUND("customer_account.not_found", "Customer account not found", "40406"),
-    INTEREST_RATE_VALID_NOT_FOUND("interest_rate.valid.not_found", "Not found interest rate valid::condition = {}", "40406"),
+    INTEREST_RATE_VALID_NOT_FOUND("interest_rate.valid.not_found", "Not found interest rate valid", "40406"),
 
 
     SERVER_ERROR("server.error.message", "Internal server error", "50000");
     private final String keyMessage;
     private final String messageLog;
     private final String code;
-    public static final String MESSAGE_LOG = "transactionId: {} - RootCause: {}";
+    public static final String MESSAGE_LOG = "transactionId: {} - RootCause: {} - DATA:{}";
     public static final String MESSAGE_LOG_NOT_FOUND_DATA="transactionId: {} - RootCause:: {} - id::{}";
 }
 

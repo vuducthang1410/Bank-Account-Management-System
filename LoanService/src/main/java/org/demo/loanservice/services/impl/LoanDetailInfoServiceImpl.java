@@ -7,6 +7,7 @@ import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.DateUtil;
 import org.demo.loanservice.common.MessageData;
 import org.demo.loanservice.controllers.exception.DataNotValidException;
+import org.demo.loanservice.controllers.exception.ServerErrorException;
 import org.demo.loanservice.dto.enumDto.FormDeftRepaymentEnum;
 import org.demo.loanservice.dto.enumDto.LoanStatus;
 import org.demo.loanservice.dto.enumDto.RequestStatus;
@@ -64,7 +65,7 @@ public class LoanDetailInfoServiceImpl implements ILoanDetailInfoService {
 
         // Validate if the financial information is approved
         if (!financialInfo.getRequestStatus().equals(RequestStatus.APPROVED)) {
-            log.info(MessageData.MESSAGE_LOG, MessageData.FINANCIAL_INFO_NOT_APPROVE.getMessageLog(), transactionId);
+            log.info(MessageData.MESSAGE_LOG, transactionId, MessageData.FINANCIAL_INFO_NOT_APPROVE.getMessageLog(), financialInfo.getRequestStatus());
             throw new DataNotValidException(MessageData.FINANCIAL_INFO_NOT_APPROVE.getKeyMessage(),
                     MessageData.FINANCIAL_INFO_NOT_APPROVE.getCode());
         }
@@ -81,26 +82,25 @@ public class LoanDetailInfoServiceImpl implements ILoanDetailInfoService {
 
         // Validate if the requested loan term does not exceed the product's term limit
         if (loanProduct.getTermLimit().compareTo(individualCustomerInfoRq.getLoanTerm()) < 0) {
-            log.info(MessageData.MESSAGE_LOG, MessageData.LOAN_TERM_LARGER_THAN_LIMIT.getMessageLog(), loanProduct.getTermLimit(), transactionId);
+            log.info(MessageData.MESSAGE_LOG, transactionId, MessageData.LOAN_TERM_LARGER_THAN_LIMIT.getMessageLog(), loanProduct.getTermLimit());
             throw new DataNotValidException(MessageData.LOAN_TERM_LARGER_THAN_LIMIT.getKeyMessage(),
                     MessageData.LOAN_TERM_LARGER_THAN_LIMIT.getCode());
         }
 
         Optional<LoanAmountInfoProjection> loanAmountInfoProjectionOptional = loanDetailInfoRepository.getMaxLoanLimitAndCurrentLoanAmount(customerId);
         if (loanAmountInfoProjectionOptional.isEmpty()) {
-            log.info("du lieu khong hop le");
-            return null;
+            log.info("Not found loan amount info for loan detail info");
+            throw new ServerErrorException();
         }
         LoanAmountInfoProjection loanAmountInfoProjection = loanAmountInfoProjectionOptional.get();
         BigDecimal expectedLoanAmount = individualCustomerInfoRq.getLoanAmount().add(loanAmountInfoProjection.getTotalLoanedAmount());
         if (expectedLoanAmount.compareTo(loanAmountInfoProjection.getLoanAmountMax()) > 0) {
-            log.info("vuot qua so tien duoc vay cua tai khoan");
             log.info("transactionId: {} - expected loan amount: {} - loan amount limit of customer: {}",
                     transactionId,
                     expectedLoanAmount.toPlainString(),
                     loanAmountInfoProjection.getLoanAmountMax().toPlainString());
-
-            return null;
+            throw new DataNotValidException(MessageData.LOAN_AMOUNT_LARGER_LOAN_LIMIT.getKeyMessage(),
+                    MessageData.LOAN_AMOUNT_LARGER_LOAN_LIMIT.getCode());
         }
 
         // Retrieve the applicable interest rate based on the loan amount
@@ -177,12 +177,12 @@ public class LoanDetailInfoServiceImpl implements ILoanDetailInfoService {
         LoanDetailInfo loanDetailInfo = loanDetailInfoRepository
                 .findByIdAndIsDeleted(loanInfoApprovalRq.getLoanDetailInfoId(), false)
                 .orElseThrow(() -> {
-                    log.info(MessageData.MESSAGE_LOG, MessageData.LOAN_DETAIL_INFO_NOT_FOUND, loanInfoApprovalRq.getLoanDetailInfoId(), transactionId);
+                    log.info(MessageData.MESSAGE_LOG, transactionId, MessageData.LOAN_DETAIL_INFO_NOT_FOUND, loanInfoApprovalRq.getLoanDetailInfoId());
                     return new DataNotValidException(MessageData.LOAN_DETAIL_INFO_NOT_FOUND.getKeyMessage(),
                             MessageData.LOAN_DETAIL_INFO_NOT_FOUND.getCode());
                 });
 
-        log.debug("Request status of loan info approved:{}",loanInfoApprovalRq.getRequestStatus());
+        log.debug("Request status of loan info approved:{}", loanInfoApprovalRq.getRequestStatus());
         if (loanInfoApprovalRq.getRequestStatus().equalsIgnoreCase(RequestStatus.REJECTED.name())) {
             loanDetailInfo.setRequestStatus(RequestStatus.valueOf(loanInfoApprovalRq.getRequestStatus()));
             loanDetailInfo.setNote(loanDetailInfo.getNote());
