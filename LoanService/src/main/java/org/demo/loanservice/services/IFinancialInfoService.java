@@ -18,8 +18,16 @@ public interface IFinancialInfoService{
 
     DataResponseWrapper<Object> approveFinancialInfo(ApproveFinancialInfoRq financialInfoRq, String transactionId);
 
-    DataResponseWrapper<Object> verifyFinancialInfo(String transactionId);
 
+    DataResponseWrapper<Object> getStatisticalLoan(String transactionId, String cifCode);
+
+    DataResponseWrapper<Object> verifyFinancialInfo(String transactionId, String customerId);
 
     FinancialInfo getFinancialInfoByCustomerId(String id, String transactionId);
+
+    List<FinancialInfo> getListFinancialInfoByCifCode(String cifCode, String transactionId);
+
+    DataResponseWrapper<Object> getFinancialInfoByCifCode(String cifCode, String transactionId);
+
+    DataResponseWrapper<Object> getDetailInfoActiveByCifCode(String cifCode, String transactionId);
 }

@@ -4,6 +4,6 @@ public enum LoanStatus {
     PENDING,
     ACTIVE,
     REJECTED,
-    PAID_OFF;
+    PAID_OFF
 }
 

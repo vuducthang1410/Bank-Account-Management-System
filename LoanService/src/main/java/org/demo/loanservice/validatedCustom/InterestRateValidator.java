@@ -4,8 +4,6 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.demo.loanservice.validatedCustom.interfaceValidate.InterestRateValidation;
 
-import java.math.BigDecimal;
-
 public class InterestRateValidator implements ConstraintValidator<InterestRateValidation, Double> {
     @Override
     public boolean isValid(Double value, ConstraintValidatorContext constraintValidatorContext) {

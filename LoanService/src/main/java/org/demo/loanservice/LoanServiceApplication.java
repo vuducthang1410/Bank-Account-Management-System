@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.util.TimeZone;
 
 @SpringBootApplication
-//@EnableDubbo
+@EnableDubbo
 @EnableScheduling
 public class LoanServiceApplication {
 

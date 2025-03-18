@@ -2,6 +2,7 @@ package org.demo.loanservice.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.Util;
@@ -9,28 +10,19 @@ import org.demo.loanservice.dto.request.LoanProductRq;
 import org.demo.loanservice.services.ILoanProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
 @Schema
-@RequestMapping(Util.API_RESOURCE+"/loan-product")
+@RequestMapping(Util.API_RESOURCE + "/loan-product")
 public class LoanProductController {
     private final ILoanProductService loanProductService;
 
     @Operation
-    @GetMapping("/get-all")
+    @GetMapping("/get-all-by-active")
     public ResponseEntity<DataResponseWrapper<Object>> getAll(
             @RequestParam(name = "pageNumber", defaultValue = "0", required = false)
             @Schema(description = "Page number for pagination", example = "0")
@@ -42,9 +34,10 @@ public class LoanProductController {
 
             @RequestHeader(name = "transactionId")
             @Schema(description = "Unique transaction ID for the request", example = "12345abcde")
-            String transactionId
+            String transactionId,
+            @RequestParam(name = "active", defaultValue = "true") Boolean isActive
     ) {
-        return new ResponseEntity<>(loanProductService.getAll(pageNumber, pageSize, transactionId), HttpStatus.OK);
+        return new ResponseEntity<>(loanProductService.getAllByActive(pageNumber, pageSize, isActive, transactionId), HttpStatus.OK);
     }
 
     @Operation
@@ -59,7 +52,7 @@ public class LoanProductController {
     @Operation
     @PostMapping("/save")
     public ResponseEntity<DataResponseWrapper<Object>> save(
-            @RequestBody LoanProductRq loanProductRq,
+            @RequestBody @Valid LoanProductRq loanProductRq,
             @RequestHeader(name = "transactionId") String transactionId
     ) {
         return new ResponseEntity<>(loanProductService.save(loanProductRq, transactionId), HttpStatus.OK);
@@ -93,13 +86,28 @@ public class LoanProductController {
         return new ResponseEntity<>(loanProductService.delete(id, transactionId), HttpStatus.OK);
     }
 
-    @Operation
-    @PatchMapping("/change-image-loan-product/{id}")
-    public ResponseEntity<DataResponseWrapper<Object>> changeImageLoanProduct(
-            @PathVariable(name = "id")String id,
-            @RequestParam(name = "image")MultipartFile image,
-            @RequestHeader(name = "transactionId")String transactionId
+    @GetMapping("/get-all-loan-product-active")
+    public ResponseEntity<DataResponseWrapper<Object>> getAllByActive(
+            @RequestParam(name = "pageSize") Integer pageSize,
+            @RequestParam(name = "pageNum") Integer pageNum,
+            @RequestHeader(name = "transactionId") String transactionId
+    ) {
+        return ResponseEntity.ok(loanProductService.getAllLoanProductIsActive(pageNum, pageSize, transactionId));
+    }
+
+    @GetMapping("/loan-product-detail/{id}")
+    public ResponseEntity<DataResponseWrapper<Object>> getLoanProductDetail(
+            @PathVariable(name = "id") String id,
+            @RequestHeader(name = "transactionId") String transactionId) {
+        return ResponseEntity.ok(loanProductService.getLoanProductForUserById(id,transactionId));
+    }
+    @GetMapping("/loan-product/report")
+    public ResponseEntity<DataResponseWrapper<Object>> getLoanProductReport(
+            @RequestParam(name = "cifCode",required = false)String cifCode,
+            @RequestParam(name = "fromDate",required = false)Date fromDate,
+            @RequestParam(name = "endDate",required = false)Date endDate,
+            @RequestHeader(name = "transactionId",required = false)String transactionId
             ){
-        return new ResponseEntity<>(loanProductService.saveImageLoanProduct(id, image, transactionId), HttpStatus.OK);
+        return ResponseEntity.ok(loanProductService.getLoanProductReport(cifCode,fromDate,endDate,transactionId));
     }
 }

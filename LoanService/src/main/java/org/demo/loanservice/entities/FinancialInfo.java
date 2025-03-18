@@ -1,13 +1,7 @@
 package org.demo.loanservice.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +26,8 @@ import java.util.Set;
 public class FinancialInfo extends BaseEntity{
     @Column(name = "customer_id")
     private String  customerId;
+    private String cifCode;
+    private String customerNumber;
     private String income;
     @Enumerated(EnumType.STRING)
     private Unit unit;

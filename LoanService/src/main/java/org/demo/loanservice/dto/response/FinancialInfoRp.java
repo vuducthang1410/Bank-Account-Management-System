@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -12,7 +11,9 @@ import java.util.List;
 public class FinancialInfoRp implements Serializable {
     private String customerId;
     private String customerName;
-    private String customerImage;
+    private String numberPhone;
+    private String identificationNumber;
+    private String dateOfBirth;
     private String financialInfoId;
     private String income;
     private String unit;
@@ -26,5 +27,5 @@ public class FinancialInfoRp implements Serializable {
     private List<LegalDocumentRp> legalDocumentRpList;
     private String expiredDate;
     private String note;
-    private BigDecimal amountLoanLimit;
+    private String amountLoanLimit;
 }

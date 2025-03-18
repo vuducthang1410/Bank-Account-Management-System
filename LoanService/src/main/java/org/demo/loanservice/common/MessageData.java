@@ -19,14 +19,27 @@ public enum MessageData {
     CREATED_SUCCESSFUL("created.successful", "Created successfully", "20000"),
     DELETED_SUCCESSFUL("deleted.successful", "Deleted successfully", "20000"),
     FIND_SUCCESSFULLY("findObject.success", "Find object successfully", "20000"),
-
-
+    UPDATE_SUCCESSFULLY("updateObject.success", "Update status object successfully", "20000"),
+    PAYMENT_LOAN_SUCCESSFULLY("payment_loan.successful", "Payment loan successful", "20000"),
+    LOAN_REGISTER_SUCCESSFULLY("loan.register.successful", "Loan register successful", "20000"),
     FINANCIAL_INFO_NOT_APPROVE("financial_info.not_approve", "Financial info not approve", "30301"),
-    LOAN_AMOUNT_LARGER_LOAN_LIMIT("loan_amount.larger.loan_limit", "Loan amount larger than loan amount limit", "30302"),
-    LOAN_TERM_LARGER_THAN_LIMIT("loan_term.larger.loan_term_limit", "Loan term larger than loan term limit", "30303"),
+    LOAN_AMOUNT_LARGER_LOAN_LIMIT("loan_amount.larger.loan_limit", "Loan amount larger than loan amount limit: loan amount limit= {}", "30302"),
+    LOAN_TERM_LARGER_THAN_LIMIT("loan_term.larger.loan_term_limit", "Loan term larger than loan term limit: loan term limit= {}", "30303"),
     CUSTOMER_ACCOUNT_NOT_ACTIVE("customer_account.not_active", "Customer account is not active", "30304"),
     BANKING_ACCOUNT_NOT_ACTIVE("banking_account.not_active", "Banking account is not active", "30305"),
     CREATED_LOAN_ACCOUNT_ERROR("created.loan_account.error", "Created loan account is error", "30306"),
+    ACCOUNT_BALANCE_NOT_ENOUGH("account_balance.not_enough", "Account balance is not enough to make transactions", "30307"),
+    PAYMENT_SCHEDULE_COMPLETED("payment_schedule.completed", "The payment has already been completed", "30308"),
+    BANKING_ACCOUNT_NOT_EXITS("banking_account.not_exits", "Execute error while get banking account.", "30309"),
+    DATA_RESPONSE_TRANSACTION_SERVICE_NOT_VALID("data_response.transaction_service.not_valid", "Data response from transaction service no valid", "30310"),
+    LOAN_AMOUNT_LARGER_LOAN_REMAINING_LIMIT("loan_amount.larger.loan_remaining_limit", "expected loan amount: {} - loan amount limit of customer: {}", "30311"),
+    REPAYMENT_LOAN_ERROR("repayment_loan.error", "Unexpected error during repayment process.", "30312"),
+    REQUEST_STATUS_LOAN_NOT_PENDING("request_status.loan.not_pending", "Request status of loan detail info is not pending: loan detail info id -{} :: request status - {}", "30313"),
+    RESOURCE_MAPPING_MESSAGE_ERROR("resource.mapping.message.error", "Mapping message in resource error", "30314"),
+    APPROVE_INDIVIDUAL_CUSTOMER_DISBURSEMENT_ERROR("approve.individual_customer.disbursement.error","execute error when approve loan","30315"),
+    INTEREST_RATE_TERM_MIN_GREATER_TERM_LIMIT_LOAN_PRODUCT("interest_rate.term_min_greater_term_limit.loan_product", "Minimum term interest rate is greater than term limit in loan product", "30316"),
+    INTEREST_RATE_AMOUNT_MIN_GREATER_AMOUNT_LIMIT_LOAN_PRODUCT("interest_rate.amount_min_greater_amount_limit.loan_product", "Minimum amount interest rate is greater than amount limit in loan product", "30317"),
+    FINANCIAL_INFO_IS_REGISTERED("financial_info.is_registered", "Financial info is registered", "30318"),
 
     DATA_NOT_FOUND("data.notFound", "Data not found", "40400"),
     INTEREST_RATE_NOT_FOUND("interest_rate.not_found", "Interest rate not found", "40401"),
@@ -34,14 +47,15 @@ public enum MessageData {
     FINANCIAL_INFO_NOT_FOUND("financial_info.not_found", "Financial info not found", "40404"),
     LOAN_DETAIL_INFO_NOT_FOUND("loan_detail_info.not_found", "Loan detail info not found", "40405"),
     CUSTOMER_ACCOUNT_NOT_FOUND("customer_account.not_found", "Customer account not found", "40406"),
-    INTEREST_RATE_VALID_NOT_FOUND("interest_rate.valid.not_found", "Not found interest rate valid", "40406"),
-
-
+    INTEREST_RATE_VALID_NOT_FOUND("interest_rate.valid.not_found", "Not found interest rate valid::condition = {}", "40406"),
+    PAYMENT_SCHEDULE_NOT_FOUND("payment_schedule.not_found", "Not found payment schedule valid", "40407"),
+    LOAN_LIMIT_AND_TOTAL_LOAN_AMOUNT_NOT_FOUND("loan_limit_and_total_loan_amount.not_found", "Not found information for loan amount and loan amount limit of customer", "40408"),
     SERVER_ERROR("server.error.message", "Internal server error", "50000");
     private final String keyMessage;
     private final String messageLog;
     private final String code;
-    public static final String MESSAGE_LOG = "transactionId: {} - RootCause: {} - DATA:{}";
-    public static final String MESSAGE_LOG_NOT_FOUND_DATA="transactionId: {} - RootCause:: {} - id::{}";
+    public static final String MESSAGE_LOG = "transactionId: {} - RootCause: {}";
+    public static final String MESSAGE_LOG_DETAIL = "transactionId: {} - {} - RootCause: {}";
+    public static final String MESSAGE_LOG_NOT_FOUND_DATA = "transactionId: {} - RootCause:: {} - id::{}";
 }
 

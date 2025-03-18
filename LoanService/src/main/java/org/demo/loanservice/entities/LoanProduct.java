@@ -1,20 +1,8 @@
 package org.demo.loanservice.entities;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.demo.loanservice.dto.enumDto.ApplicableObjects;
 import org.demo.loanservice.dto.enumDto.LoanType;
 import org.demo.loanservice.dto.enumDto.Unit;
@@ -22,7 +10,6 @@ import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -57,8 +44,8 @@ public class LoanProduct extends BaseEntity {
 
     @Schema(description = "The interest rate ID associated with this loan product," +
             " linking to the interest rate table.")
-    @OneToMany(mappedBy = "loanProduct",fetch = FetchType.LAZY)
-    private Set<InterestRate> interestRateSet=new HashSet<>();
+    @OneToMany(mappedBy = "loanProduct", fetch = FetchType.LAZY)
+    private Set<InterestRate> interestRateSet = new HashSet<>();
 
     @Schema(description = "Utility services associated with the loan product, " +
             "which may include insurance, financial planning services, etc.")
@@ -78,5 +65,6 @@ public class LoanProduct extends BaseEntity {
     private Integer termLimit;
     @Enumerated(EnumType.STRING)
     private Unit unit;
+    private Boolean isActive;
 }
 

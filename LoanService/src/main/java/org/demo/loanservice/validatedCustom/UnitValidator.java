@@ -14,6 +14,6 @@ public class UnitValidator implements ConstraintValidator<UnitValidation, String
             return true;
         }
         return Stream.of(Unit.DATE.name(), Unit.MONTH.name(), Unit.YEAR.name())
-                .anyMatch(name -> name.equalsIgnoreCase(value));
+                .anyMatch(name -> name.equalsIgnoreCase(value.toUpperCase()));
     }
 }

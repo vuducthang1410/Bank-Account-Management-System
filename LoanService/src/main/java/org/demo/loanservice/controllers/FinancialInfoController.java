@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
 import org.demo.loanservice.common.Util;
@@ -29,7 +30,8 @@ public class FinancialInfoController {
             description = "This API allows an individual customer to submit financial information along with income verification documents."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successfully saved financial info", content = @Content(schema = @Schema(implementation = DataResponseWrapper.class))),
+            @ApiResponse(responseCode = "200", description = "Successfully saved financial info",
+                    content = @Content(schema = @Schema(implementation = DataResponseWrapper.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -38,7 +40,7 @@ public class FinancialInfoController {
             @RequestPart(name = "incomeVerificationDocuments")
             @Parameter(description = "List of income verification documents")
             List<MultipartFile> incomeVerificationDocuments,
-
+            @Valid
             @RequestPart(name = "financialInfoRq")
             @Parameter(description = "Financial information request body")
             FinancialInfoRq financialInfoRq,
@@ -95,12 +97,22 @@ public class FinancialInfoController {
             @PathVariable(name = "id")
             @Parameter(description = "Unique ID of the financial record")
             String id,
-
             @RequestHeader(name = "transactionId")
             @Parameter(description = "Unique transaction ID")
             String transactionId
     ) {
         return ResponseEntity.ok(financialInfoService.getDetailInfoById(id, transactionId));
+    }
+    @GetMapping("/individual-customer/get-detail-info-active/{cifCode}")
+    public ResponseEntity<DataResponseWrapper<Object>> getDetailInfoByCifCode(
+            @PathVariable(name = "cifCode")
+            @Parameter(description = "Unique ID of the financial record")
+            String cifCode,
+            @RequestHeader(name = "transactionId")
+            @Parameter(description = "Unique transaction ID")
+            String transactionId
+    ) {
+        return ResponseEntity.ok(financialInfoService.getDetailInfoActiveByCifCode(cifCode, transactionId));
     }
 
     @Operation(
@@ -114,6 +126,7 @@ public class FinancialInfoController {
     })
     @PatchMapping("/individual-customer/financial-info/approve")
     public ResponseEntity<DataResponseWrapper<Object>> approveFinancialInfo(
+            @Valid
             @RequestBody
             @Parameter(description = "Request body containing approval details")
             ApproveFinancialInfoRq approveFinancialInfoRq,
@@ -137,8 +150,23 @@ public class FinancialInfoController {
     public ResponseEntity<DataResponseWrapper<Object>> verifyFinancialInfo(
             @RequestHeader(name = "transactionId")
             @Parameter(description = "Unique transaction ID")
-            String transactionId
+            String transactionId,
+            @RequestParam(name = "customerId") String customerId
     ) {
-        return ResponseEntity.ok(financialInfoService.verifyFinancialInfo(transactionId));
+        return ResponseEntity.ok(financialInfoService.verifyFinancialInfo(transactionId, customerId));
+    }
+    @GetMapping("/individual-customer/financial-info/get-info")
+    public ResponseEntity<DataResponseWrapper<Object>> getFinancialInfo(
+            @RequestHeader(name = "transactionId")String transactionId,
+            @RequestParam(name = "cifCode")String cifCode
+    ){
+        return ResponseEntity.ok(financialInfoService.getFinancialInfoByCifCode(cifCode,transactionId));
+    }
+    @GetMapping("/individual-customer/financial-info/statistical-loan-by-cifCode")
+    public ResponseEntity<DataResponseWrapper<Object>> getStatisticalLoanByCifCode(
+            @RequestHeader(name = "transactionId")String transactionId,
+            @RequestParam(name = "cifCode")String cifCode
+    ){
+        return ResponseEntity.ok(financialInfoService.getStatisticalLoan(transactionId,cifCode));
     }
 }

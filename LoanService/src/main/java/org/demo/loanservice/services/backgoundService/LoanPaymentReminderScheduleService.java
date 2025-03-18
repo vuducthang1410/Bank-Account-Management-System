@@ -1,15 +1,25 @@
-package org.demo.loanservice.backgoundService;
+package org.demo.loanservice.services.backgoundService;
 
+import com.system.common_library.dto.notifcation.rabbitMQ.LoanOverDueNoti;
+import com.system.common_library.dto.notifcation.rabbitMQ.LoanReminderNoti;
+import com.system.common_library.dto.response.account.AccountInfoDTO;
+import com.system.common_library.dto.transaction.loan.CreateLoanTransactionDTO;
+import com.system.common_library.service.AccountDubboService;
+import com.system.common_library.service.TransactionDubboService;
 import lombok.RequiredArgsConstructor;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.demo.loanservice.common.DateUtil;
 import org.demo.loanservice.dto.enumDto.DeftRepaymentStatus;
+import org.demo.loanservice.dto.enumDto.PaymentTransactionType;
 import org.demo.loanservice.dto.enumDto.PaymentType;
 import org.demo.loanservice.dto.request.DeftRepaymentRq;
 import org.demo.loanservice.entities.LoanPenalties;
 import org.demo.loanservice.entities.PaymentSchedule;
 import org.demo.loanservice.repositories.LoanPenaltiesRepository;
 import org.demo.loanservice.repositories.PaymentScheduleRepository;
+import org.demo.loanservice.services.INotificationService;
 import org.demo.loanservice.services.IPaymentScheduleService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,13 +33,17 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class LoanPaymentScheduler {
+public class LoanPaymentReminderScheduleService {
 
     private final PaymentScheduleRepository paymentScheduleRepository;
     private final IPaymentScheduleService paymentScheduleService;
     private final LoanPenaltiesRepository loanPenaltiesRepository;
-
-    private static final Logger log = LogManager.getLogger(LoanPaymentScheduler.class);
+    @DubboReference
+    private AccountDubboService accountDubboService;
+    @DubboReference
+    private TransactionDubboService transactionDubboService;
+    private INotificationService notificationService;
+    private static final Logger log = LogManager.getLogger(LoanPaymentReminderScheduleService.class);
 
     /**
      * Automatically processes due loan payments.
@@ -39,9 +53,8 @@ public class LoanPaymentScheduler {
     private void automaticallyDeftRepayment() {
         log.info("Starting automatic loan repayment process...");
 
-        LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
-        Timestamp threeDaysAgoTimestamp = Timestamp.valueOf(threeDaysAgo.atStartOfDay());
-        List<PaymentSchedule> paymentSchedules = paymentScheduleRepository.findByIsDeletedFalseAndIsPaidFalseAndDueDate(threeDaysAgoTimestamp);
+        Timestamp threeDaysAgo = Timestamp.valueOf(LocalDate.now().minusDays(3).atStartOfDay());
+        List<PaymentSchedule> paymentSchedules = paymentScheduleRepository.findByIsDeletedFalseAndIsPaidFalseAndDueDate(threeDaysAgo);
 
         if (paymentSchedules.isEmpty()) {
             log.info("No suitable loan found for automatic payment.");
@@ -68,9 +81,9 @@ public class LoanPaymentScheduler {
     @Scheduled(cron = "${spring.cron-job.notify-up-coming-repayment}")
     private void notifyUpcomingDuePayments() {
         log.info("Checking for upcoming due payments...");
-        LocalDate oneDayAhead=LocalDate.now().plusDays(1);
-        Timestamp oneDayAheadTimestamp = Timestamp.valueOf(oneDayAhead.atStartOfDay());
-        List<PaymentSchedule> upcomingPayments = paymentScheduleRepository.findByIsDeletedFalseAndIsPaidFalseAndDueDate(oneDayAheadTimestamp);
+
+        Timestamp oneDayAhead = Timestamp.valueOf(LocalDate.now().plusDays(1).atStartOfDay());
+        List<PaymentSchedule> upcomingPayments = paymentScheduleRepository.findByIsDeletedFalseAndIsPaidFalseAndDueDate(oneDayAhead);
 
         if (upcomingPayments.isEmpty()) {
             log.info("No upcoming due loan found for notification.");
@@ -79,8 +92,14 @@ public class LoanPaymentScheduler {
 
         log.info("Notifying {} user(s) about upcoming due payments.", upcomingPayments.size());
         upcomingPayments.forEach(paymentSchedule -> {
-            log.debug("Loan ID: {}, Due Date: {}", paymentSchedule.getLoanDetailInfo().getLoanAccountId(), paymentSchedule.getDueDate());
-            // TODO: Implement actual notification service
+            log.debug("Loan ID: {}, Due Date: {}", paymentSchedule.getLoanDetailInfo().getDisbursementInfoHistory().getLoanAccountId(), paymentSchedule.getDueDate());
+            LoanReminderNoti loanReminderNoti=new LoanReminderNoti();
+            String cifCode=paymentSchedule.getLoanDetailInfo().getFinancialInfo().getCifCode();
+            loanReminderNoti.setDueDate(DateUtil.convertTimeStampToLocalDate(paymentSchedule.getDueDate()));
+            loanReminderNoti.setCustomerCIF(cifCode);
+            loanReminderNoti.setContractNumber(paymentSchedule.getLoanDetailInfo().getId());
+            loanReminderNoti.setAmountDue(paymentSchedule.getAmountRepayment().add(paymentSchedule.getAmountInterestRate()));
+            notificationService.sendNotificationLoanReminder(loanReminderNoti);
         });
 
         log.info("Upcoming due payment notifications sent.");
@@ -92,9 +111,9 @@ public class LoanPaymentScheduler {
     @Scheduled(cron = "${spring.cron-job.process-overdue-payments}")
     private void processOverduePayments() {
         log.info("Checking for overdue loans...");
-        LocalDate fourDaysAgo=LocalDate.now().minusDays(3);
-        Timestamp fourDaysAgoTimestamp = Timestamp.valueOf(fourDaysAgo.atStartOfDay());
-        List<PaymentSchedule> overduePayments = paymentScheduleRepository.findByIsDeletedFalseAndIsPaidFalseAndDueDateBefore(fourDaysAgoTimestamp);
+
+        Timestamp fourDaysAgo = Timestamp.valueOf(LocalDate.now().minusDays(3).atStartOfDay());
+        List<PaymentSchedule> overduePayments = paymentScheduleRepository.findByIsDeletedFalseAndIsPaidFalseAndDueDateBefore(fourDaysAgo);
 
         if (overduePayments.isEmpty()) {
             log.info("No overdue loan found for penalty enforcement.");
@@ -109,18 +128,34 @@ public class LoanPaymentScheduler {
             penalty.setFinedPaymentDate(new Date());
             penalty.setIsPaid(false);
             penalty.setFinedReason(DeftRepaymentStatus.OVERDUE.name());
-            penalty.setLoanDetailInfo(paymentSchedule.getLoanDetailInfo());
+            penalty.setPaymentSchedule(paymentSchedule);
 
             // Calculate overdue penalty based on the loan amount and interest rate
             BigDecimal fineAmount = paymentSchedule.getAmountRepayment()
                     .multiply(BigDecimal.valueOf(paymentSchedule.getLoanDetailInfo().getInterestRate()))
                     .multiply(new BigDecimal("1.5"));
-
             penalty.setFinedAmount(fineAmount);
             penaltiesList.add(penalty);
+            String cifCode=paymentSchedule.getLoanDetailInfo().getFinancialInfo().getCifCode();
+            AccountInfoDTO accountLoanInfoDTO = accountDubboService.getLoanAccountDTO(paymentSchedule.getLoanDetailInfo().getDisbursementInfoHistory().getLoanAccountId());
+            CreateLoanTransactionDTO loanTransactionDTO = new CreateLoanTransactionDTO();
+            loanTransactionDTO.setAmount(fineAmount);
+            loanTransactionDTO.setDescription(PaymentType.PENALTY.name());
+            loanTransactionDTO.setCifCode(cifCode);
+            loanTransactionDTO.setLoanAccount(accountLoanInfoDTO.getAccountNumber());
+            loanTransactionDTO.setNote(PaymentTransactionType.OVERDUE_PAYMENT_PENALTY.name());
+            transactionDubboService.createLoanTransaction(loanTransactionDTO);
 
+            LoanOverDueNoti loanOverDueNoti=new LoanOverDueNoti();
+            loanOverDueNoti.setAmountDue(paymentSchedule.getAmountRepayment().add(paymentSchedule.getAmountInterestRate()));
+            loanOverDueNoti.setDueDate(DateUtil.convertTimeStampToLocalDate(paymentSchedule.getDueDate()));
+            loanOverDueNoti.setCustomerCIF(cifCode);
+            loanOverDueNoti.setPenaltyFee(fineAmount);
+            loanOverDueNoti.setContractNumber(paymentSchedule.getLoanDetailInfo().getId());
+            loanOverDueNoti.setOverdueDays((int) DateUtil.daysElapsedFromTimestamp(paymentSchedule.getDueDate().getTime()));
+            notificationService.sendNotificationOverdue(loanOverDueNoti);
             log.debug("Penalty applied: Loan ID: {},Amount:{},Interest rate: {}, Fine Amount: {}",
-                    paymentSchedule.getLoanDetailInfo().getLoanAccountId(),
+                    paymentSchedule.getLoanDetailInfo().getDisbursementInfoHistory().getLoanAccountId(),
                     paymentSchedule.getAmountRepayment(),
                     paymentSchedule.getLoanDetailInfo().getInterestRate(),
                     fineAmount);

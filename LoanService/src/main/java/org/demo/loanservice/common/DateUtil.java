@@ -5,11 +5,13 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -19,9 +21,19 @@ public class DateUtil {
     public static final String DD_MM_YYYY_SLASH="dd/MM/yyyy";
     public static final String DD_MM_YYY_HH_MM_SLASH="dd/MM/yyyy HH:mm";
     public static final String YYYY_MM_DD_HH_MM_SS="yyyy/MM/dd HH:mm:ss";
+    public static final String ZONE_ID_VN_HCM="Asia/Ho_Chi_Minh";
     private static final Logger log = LoggerFactory.getLogger(DateUtil.class);
 
     public static String format(String format, Date date){
+        try{
+            SimpleDateFormat sdf=new SimpleDateFormat(format);
+            return sdf.format(date);
+        }catch (Exception ex){
+            log.error(ex.getMessage());
+            return "";
+        }
+    }
+    public static String format(String format, LocalDate date){
         try{
             SimpleDateFormat sdf=new SimpleDateFormat(format);
             return sdf.format(date);
@@ -72,5 +84,15 @@ public class DateUtil {
 
         ZonedDateTime zonedDateTime = ZonedDateTime.parse(timeString, formatter);
         return  Timestamp.from(zonedDateTime.toInstant());
+    }
+    public static LocalDate convertTimeStampToLocalDate(Timestamp timestamp){
+        return timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+    public static long daysElapsedFromTimestamp(long timestamp) {
+        LocalDate pastDate = Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        LocalDate currentDate = LocalDate.now();
+        return ChronoUnit.DAYS.between(pastDate, currentDate);
     }
 }

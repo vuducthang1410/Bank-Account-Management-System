@@ -2,14 +2,6 @@ package org.demo.loanservice.dto.enumDto;
 
 public enum FormDeftRepaymentEnum {
     /**
-     * Pay interest monthly, principal is paid quarterly.
-     * - Each month: The borrower only pays the interest on the loan.
-     * - Every quarter (every 3 months): The borrower pays a portion of the principal along with that month's interest.
-     * - Suitable for borrowers with cyclical income, reducing monthly financial pressure.
-     */
-//    PRINCIPAL_QUARTERLY_INTEREST_MONTHLY,
-
-    /**
      * Monthly repayment of both principal and interest, with interest calculated on the remaining loan balance.
      * - Each month: The borrower pays a portion of the principal and interest calculated based on the remaining loan balance.
      * - Interest decreases over time as the loan balance is gradually reduced.

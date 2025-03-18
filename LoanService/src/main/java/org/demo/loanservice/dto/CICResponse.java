@@ -2,7 +2,6 @@ package org.demo.loanservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import java.time.LocalDateTime;
 
 @Data
 public class CICResponse {

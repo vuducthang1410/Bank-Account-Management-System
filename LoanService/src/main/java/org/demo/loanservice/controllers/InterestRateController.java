@@ -2,8 +2,8 @@ package org.demo.loanservice.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.demo.loanservice.common.DataResponseWrapper;
@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(Util.API_RESOURCE+"/interest-rate")
+@RequestMapping(Util.API_RESOURCE + "/interest-rate")
 @RequiredArgsConstructor
 public class InterestRateController {
     private final IInterestRateService interestRateService;
@@ -60,13 +60,14 @@ public class InterestRateController {
             @ApiResponse(responseCode = "200", description = "List of interest rates retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid pagination parameters")
     })
-    @GetMapping("/get-all")
+    @GetMapping("/get-all-loan-product/{loanProductId}")
     public ResponseEntity<DataResponseWrapper<Object>> getAll(
             @RequestParam(name = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "12", required = false) Integer pageSize,
+            @PathVariable(name = "loanProductId") String loanProductId,
             @RequestHeader(name = "transactionId") String transactionId
     ) {
-        return new ResponseEntity<>(interestRateService.getAll(pageNumber, pageSize, transactionId), HttpStatus.OK);
+        return new ResponseEntity<>(interestRateService.getAllInterestRateByLoanProductId(pageNumber, pageSize, loanProductId, transactionId), HttpStatus.OK);
     }
 
     @Operation(
@@ -96,6 +97,7 @@ public class InterestRateController {
     })
     @PatchMapping("/update/{id}")
     public ResponseEntity<DataResponseWrapper<Object>> update(
+            @Valid
             @RequestBody InterestRateRq interestRateRq,
             @PathVariable(name = "id") String id,
             @RequestHeader(name = "transactionId") String transactionId
